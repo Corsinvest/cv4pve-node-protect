@@ -72,43 +72,39 @@ Directory Node to archive:");
             foreach (var (host, port) in ClientHelper.GetHostsAndPorts(hostsAndPort, 22, true, null))
             {
                 // Execute a (SHELL) Command for download
-                using (var sshClient = new SshClient(host, port, username, password))
+                using var sshClient = new SshClient(host, port, username, password);
+                //create tar
+                sshClient.Connect();
+
+                var cmdCreateTarGz = $"tar -cvzPf {fileNameTarGz} {string.Join(" ", pathsToBackup)}";
+                var retCmd = sshClient.CreateCommand(cmdCreateTarGz).Execute();
+                if (debug)
                 {
-                    //create tar
-                    sshClient.Connect();
-
-                    var cmdCreateTarGz = $"tar -cvzPf {fileNameTarGz} {string.Join(" ", pathsToBackup)}";
-                    var retCmd = sshClient.CreateCommand(cmdCreateTarGz).Execute();
-                    if (debug)
-                    {
-                        @out.WriteLine($"Create file tar.gz: {cmdCreateTarGz}");
-                        @out.WriteLine($"Result command: {retCmd}");
-                    }
-
-                    var fileToSave = Path.Combine(pathSave, $"{host}{FILE_NAME}");
-
-                    // download
-                    using (var sftp = new SftpClient(host, port, username, password))
-                    using (var stream = File.OpenWrite(fileToSave))
-                    {
-                        sftp.Connect();
-                        if (debug) { @out.WriteLine($"Download file tar.gz: {fileNameTarGz} to {fileToSave}"); }
-                        sftp.DownloadFile(fileNameTarGz, stream);
-                        sftp.Disconnect();
-                    }
-
-                    //delete tar
-                    var cmdRmTarGz = $"rm {fileNameTarGz}";
-                    retCmd = sshClient.CreateCommand(cmdRmTarGz).Execute();
-                    if (debug)
-                    {
-                        @out.WriteLine($"Delete tar.gz: {cmdRmTarGz}");
-                        @out.WriteLine($"Result command: {retCmd}");
-                    }
-                    sshClient.Disconnect();
-
-                    @out.WriteLine($"Create config: {fileToSave}");
+                    @out.WriteLine($"Create file tar.gz: {cmdCreateTarGz}");
+                    @out.WriteLine($"Result command: {retCmd}");
                 }
+
+                var fileToSave = Path.Combine(pathSave, $"{host}{FILE_NAME}");
+
+                // download
+                using var sftp = new SftpClient(host, port, username, password);
+                using var stream = File.OpenWrite(fileToSave);
+                sftp.Connect();
+                if (debug) { @out.WriteLine($"Download file tar.gz: {fileNameTarGz} to {fileToSave}"); }
+                sftp.DownloadFile(fileNameTarGz, stream);
+                sftp.Disconnect();
+
+                //delete tar
+                var cmdRmTarGz = $"rm {fileNameTarGz}";
+                retCmd = sshClient.CreateCommand(cmdRmTarGz).Execute();
+                if (debug)
+                {
+                    @out.WriteLine($"Delete tar.gz: {cmdRmTarGz}");
+                    @out.WriteLine($"Result command: {retCmd}");
+                }
+                sshClient.Disconnect();
+
+                @out.WriteLine($"Create config: {fileToSave}");
             }
 
             //keep
@@ -154,20 +150,18 @@ Directory Node to archive:");
             var fileName = FileNameLinuxTarGz(DirectoryToDate(fileTarGz));
 
             //upload
-            using (var sftp = new SftpClient(host, port, username, password))
-            using (var stream = File.OpenRead(fileTarGz))
+            using var sftp = new SftpClient(host, port, username, password);
+            using var stream = File.OpenRead(fileTarGz);
+            sftp.Connect();
+
+            if (debug)
             {
-                sftp.Connect();
-
-                if (debug)
-                {
-                    @out.WriteLine($"Host: {host}:{port}");
-                    @out.WriteLine($"File upload: {fileName}");
-                }
-
-                sftp.UploadFile(stream, fileName);
-                sftp.Disconnect();
+                @out.WriteLine($"Host: {host}:{port}");
+                @out.WriteLine($"File upload: {fileName}");
             }
+
+            sftp.UploadFile(stream, fileName);
+            sftp.Disconnect();
         }
     }
 }

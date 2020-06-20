@@ -1,4 +1,4 @@
-# This file is part of the cv4pve-autosnap https://github.com/Corsinvest/cv4pve-pepper,
+# This file is part of the cv4pve-node-protect https://github.com/Corsinvest/cv4pve-node-protect,
 #
 # This source file is available under two different licenses:
 # - GNU General Public License version 3 (GPLv3)
