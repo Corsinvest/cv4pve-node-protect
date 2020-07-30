@@ -19,6 +19,7 @@ namespace Corsinvest.ProxmoxVE.NodeProtect
         static int Main(string[] args)
         {
             var app = ShellHelper.CreateConsoleApp("cv4pve-node-protect", "Node protect for Proxmox VE");
+            app.GetApiToken().ShowInHelpText = false;
             new ShellCommands(app);
             return app.ExecuteConsoleApp(args);
         }
