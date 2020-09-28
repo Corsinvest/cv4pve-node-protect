@@ -55,8 +55,8 @@ namespace Corsinvest.ProxmoxVE.NodeProtect.Api
                                   bool debug,
                                   TextWriter @out)
         {
-            @out.WriteLine($@"ACTION Backup 
-Keep: {keep} 
+            @out.WriteLine($@"ACTION Backup
+Keep: {keep}
 Directory Work: {directoryWork}
 Directory Node to archive:");
 
