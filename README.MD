@@ -1,6 +1,6 @@
 # cv4pve-node-protect
 
-[![License](https://img.shields.io/github/license/Corsinvest/cv4pve-node-protect.svg)](LICENSE.md) [![AppVeyor branch](https://img.shields.io/appveyor/ci/franklupo/cv4pve-node-protect/master.svg)](https://ci.appveyor.com/project/franklupo/cv4pve-node-protect)
+[![License](https://img.shields.io/github/license/Corsinvest/cv4pve-node-protect.svg)](LICENSE.md)
 
 ```text
     ______                _                      __
