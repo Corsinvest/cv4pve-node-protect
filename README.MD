@@ -3,33 +3,28 @@
 [![License](https://img.shields.io/github/license/Corsinvest/cv4pve-node-protect.svg)](LICENSE.md)
 
 ```text
-    ______                _                      __
-   / ____/___  __________(_)___ _   _____  _____/ /_
-  / /   / __ \/ ___/ ___/ / __ \ | / / _ \/ ___/ __/
- / /___/ /_/ / /  (__  ) / / / / |/ /  __(__  ) /_
- \____/\____/_/  /____/_/_/ /_/|___/\___/____/\__/
+     ______                _                      __
+    / ____/___  __________(_)___ _   _____  _____/ /_
+   / /   / __ \/ ___/ ___/ / __ \ | / / _ \/ ___/ __/
+  / /___/ /_/ / /  (__  ) / / / / |/ /  __(__  ) /_
+  \____/\____/_/  /____/_/_/ /_/|___/\___/____/\__/
 
-Node protect for Proxmox VE         (Made in Italy)
+  cv4pve-node-protect is a part of suite cv4pve.
+  For more information visit https://www.corsinvest.it/cv4pve
 
-Usage: cv4pve-node-protect [options]
+Usage:
+  cv4pve-node-protect [command] [options]
 
 Options:
-  -?|-h|--help      Show help information
-  --version         Show version information
-  --host            The host name host[:port],host1[:port],host2[:port]
-  --username        User name
-  --password        The password
+  --username <username>     User name
+  --password <password>     The Password
+  --host <host> (REQUIRED)  The host name host[:port],host1[:port],host2[:port]
+  --version                 Show version information
+  -?, -h, --help            Show help and usage information
 
 Commands:
-  app-check-update  Check update application
-  app-upgrade       Upgrade application
-  backup            Backup configuration form nodes using ssh
-  upload            Upload configuration tar.gz to node
-
-Run 'cv4pve-node-protect [command] --help' for more information about a command.
-
-cv4pve-node-protect is a part of suite cv4pve-tools.
-For more information visit https://www.cv4pve-tools.com
+  backup  Backup configuration form nodes using ssh
+  upload  Upload configuration tar.gz to node
 ```
 
 ## Copyright and License
@@ -39,7 +34,7 @@ For licensing details please visit [LICENSE.md](LICENSE.md)
 
 ## Commercial Support
 
-This software is part of a suite of tools called cv4pve-tools. If you want commercial support, visit the [site](https://www.cv4pve-tools.com)
+This software is part of a suite of tools called cv4pve-tools. If you want commercial support, visit the [site](https://www.corsinvest.it/cv4pve)
 
 ## Introduction
 

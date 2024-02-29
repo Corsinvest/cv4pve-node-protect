@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TargetFramework>net8.0</TargetFramework>
 
-    <Version>1.5.0</Version>
+    <Version>1.6.0</Version>
     <Company>Corsinvest Srl</Company>
     <Authors>Daniele Corsini</Authors>
     <Copyright>Corsinvest Srl</Copyright>
@@ -13,13 +12,20 @@
 
     <PackageProjectUrl>https://github.com/Corsinvest/cv4pve-node-protect</PackageProjectUrl>
     <PackageTags>ProxmoxVE;Api,Client;Rest;Corsinvest;Node;Protect</PackageTags>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageReleaseNotes></PackageReleaseNotes>
-    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/Corsinvest/cv4pve-node-protect</RepositoryUrl>
+
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+    <PackageOutputPath>..\..\..\.nupkgs\</PackageOutputPath>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RepositoryType>Github</RepositoryType>
-    <RepositoryUrl>https://github.com/Corsinvest/cv4pve-node-protect</RepositoryUrl>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <!-- Include symbol files (*.pdb) in the built .nupkg -->
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>
+      $(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -33,8 +39,8 @@
 
   <ItemGroup>
     <!-- <ProjectReference Include="..\..\..\cv4pve-api-dotnet\src\Corsinvest.ProxmoxVE.Api.Extension\Corsinvest.ProxmoxVE.Api.Extension.csproj" /> -->
-    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="7.3.6" />
+    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="8.1.3" />
 
-    <PackageReference Include="SSH.NET" Version="2020.0.2" />
+    <PackageReference Include="SSH.NET" Version="2024.0.0" />
   </ItemGroup>
 </Project>
