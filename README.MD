@@ -53,6 +53,10 @@ The idea are download configuration file from nodes Proxmox VE.
 * Execute out side Proxmox VE
 * Connect SSH
 
+## Web GUI Version in cv4pve-admin
+
+[![cv4pve-admin](https://raw.githubusercontent.com/Corsinvest/cv4pve-admin/main/src/Corsinvest.ProxmoxVE.Admin/wwwroot/doc/images/screenshot/modules/node-protect/grid.png)](https://github.com/Corsinvest/cv4pve-admin)
+
 ## Configuration
 
 E.g. install on linux 64
