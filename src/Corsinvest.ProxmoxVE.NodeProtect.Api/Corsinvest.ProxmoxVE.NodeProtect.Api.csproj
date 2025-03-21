@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net7.0;net8.0;net9.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
 
-    <Version>1.6.1</Version>
+    <Version>1.7.0</Version>
     <Company>Corsinvest Srl</Company>
-    <Authors>Daniele Corsini</Authors>
+    <Authors>Corsinvest Srl</Authors>
     <Copyright>Corsinvest Srl</Copyright>
     <Product>Corsinvest for Proxmox VE Node Protrect</Product>
     <AssemblyTitle>Corsinvest for Proxmox VE Node Protrect</AssemblyTitle>
@@ -20,6 +21,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RepositoryType>Github</RepositoryType>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -41,7 +43,7 @@
     <!-- <ProjectReference
     Include="..\..\..\cv4pve-api-dotnet\src\Corsinvest.ProxmoxVE.Api.Extension\Corsinvest.ProxmoxVE.Api.Extension.csproj"
     /> -->
-    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="8.2.0" />
-    <PackageReference Include="SSH.NET" Version="2024.0.0" />
+    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="8.3.3" />
+    <PackageReference Include="SSH.NET" Version="2024.2.0" />
   </ItemGroup>
 </Project>

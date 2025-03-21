@@ -3,7 +3,6 @@
  * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
  */
 
-using System;
 using System.CommandLine;
 using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
 using Corsinvest.ProxmoxVE.NodeProtect.Api;

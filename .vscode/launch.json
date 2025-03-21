@@ -6,8 +6,10 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/Corsinvest.ProxmoxVE.NodeProtect/bin/Debug/net8.0/cv4pve-node-protect.dll",
-            "args": [],
+            "program": "${workspaceFolder}/src/Corsinvest.ProxmoxVE.NodeProtect/bin/Debug/net9.0/cv4pve-node-protect.dll",
+            "args": [
+                "@Parm.parm"
+            ],
             "cwd": "${workspaceFolder}/src/Corsinvest.ProxmoxVE.NodeProtect",
             "console": "internalConsole",
             "stopAtEntry": false
