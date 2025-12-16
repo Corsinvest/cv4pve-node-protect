@@ -5,7 +5,7 @@
     <AssemblyName>cv4pve-node-protect</AssemblyName>
     <Product>Corsinvest for Proxmox VE Node Protect</Product>
     <AssemblyTitle>Corsinvest for Proxmox VE Node Protect</AssemblyTitle>
-    <Description>Corsinvest for Proxmox VE Node Protect</Description>
+    <Description>Backup and restore tool for Proxmox VE node configurations via SSH. Supports automated backups with retention policies and cluster-wide operations.</Description>
     <InvariantGlobalization>true</InvariantGlobalization>
     <PredefinedCulturesOnly>false</PredefinedCulturesOnly>
     <RepositoryUrl>https://github.com/Corsinvest/cv4pve-node-protect</RepositoryUrl>

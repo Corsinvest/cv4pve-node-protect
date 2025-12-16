@@ -6,7 +6,7 @@
 		<PackageProjectUrl>https://github.com/Corsinvest/cv4pve-node-protect</PackageProjectUrl>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>ProxmoxVE;Api,Client;Rest;Corsinvest;Node;Protect</PackageTags>
+		<PackageTags>ProxmoxVE;Proxmox;Backup;Configuration;SSH;Node;Protection;Cluster;Api;Client;Rest;Corsinvest</PackageTags>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageOutputPath>..\..\..\.nupkgs\</PackageOutputPath>
 		<RepositoryType>git</RepositoryType>
