@@ -1,49 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>net7.0;net8.0;net9.0</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+		<OutputType>Library</OutputType>
 
-    <Version>1.7.0</Version>
-    <Company>Corsinvest Srl</Company>
-    <Authors>Corsinvest Srl</Authors>
-    <Copyright>Corsinvest Srl</Copyright>
-    <Product>Corsinvest for Proxmox VE Node Protrect</Product>
-    <AssemblyTitle>Corsinvest for Proxmox VE Node Protrect</AssemblyTitle>
-    <Description>Corsinvest for Proxmox VE Node Protrect</Description>
+		<PackageProjectUrl>https://github.com/Corsinvest/cv4pve-node-protect</PackageProjectUrl>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageTags>ProxmoxVE;Api,Client;Rest;Corsinvest;Node;Protect</PackageTags>
+		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+		<PackageOutputPath>..\..\..\.nupkgs\</PackageOutputPath>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/Corsinvest/cv4pve-node-protect</RepositoryUrl>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<!-- Include symbol files (*.pdb) in the built .nupkg -->
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>
+			$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
-    <PackageProjectUrl>https://github.com/Corsinvest/cv4pve-node-protect</PackageProjectUrl>
-    <PackageTags>ProxmoxVE;Api,Client;Rest;Corsinvest;Node;Protect</PackageTags>
-    <RepositoryUrl>https://github.com/Corsinvest/cv4pve-node-protect</RepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
-    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-    <PackageOutputPath>..\..\..\.nupkgs\</PackageOutputPath>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageIcon>icon.png</PackageIcon>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RepositoryType>Github</RepositoryType>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<ItemGroup>
+		<None Include="..\..\icon.png" Pack="true" PackagePath="" />
+		<None Include="..\..\README.md" Pack="true" PackagePath="" />
+	</ItemGroup>
 
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <!-- Include symbol files (*.pdb) in the built .nupkg -->
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>
-      $(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\..\LICENSE.md" Pack="true" PackagePath="" />
-    <None Include="..\..\icon.png" Pack="true" PackagePath="" />
-    <none Include="..\..\README.md" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- <ProjectReference
-    Include="..\..\..\cv4pve-api-dotnet\src\Corsinvest.ProxmoxVE.Api.Extension\Corsinvest.ProxmoxVE.Api.Extension.csproj"
-    /> -->
-    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="8.3.3" />
-    <PackageReference Include="SSH.NET" Version="2024.2.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" />
+		<PackageReference Include="SSH.NET" />
+	</ItemGroup>
 </Project>

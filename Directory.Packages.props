@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <PackageOutputPath>..\nupkgs\</PackageOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Extension" Version="9.1.1" />
+    <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Console" Version="9.1.1" />
+    <PackageVersion Include="SSH.NET" Version="2025.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+  </ItemGroup>
+</Project>
