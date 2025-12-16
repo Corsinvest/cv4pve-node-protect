@@ -1,0 +1,33 @@
+# Created using wingetcreate 1.10.3.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.nodeprotect
+PackageVersion: 1.0.0
+InstallerType: portable
+Commands:
+- cv4pve-node-protect
+ReleaseDate: 2025-01-01
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/Corsinvest/cv4pve-node-protect/releases/download/v1.0.0/cv4pve-node-protect.exe-win-x64.zip
+  InstallerSha256: PLACEHOLDER_SHA256_X64
+  NestedInstallerType: portable
+  NestedInstallerFiles:
+  - RelativeFilePath: cv4pve-node-protect.exe
+    PortableCommandAlias: cv4pve-node-protect
+- Architecture: x86
+  InstallerUrl: https://github.com/Corsinvest/cv4pve-node-protect/releases/download/v1.0.0/cv4pve-node-protect.exe-win-x86.zip
+  InstallerSha256: PLACEHOLDER_SHA256_X86
+  NestedInstallerType: portable
+  NestedInstallerFiles:
+  - RelativeFilePath: cv4pve-node-protect.exe
+    PortableCommandAlias: cv4pve-node-protect
+- Architecture: arm64
+  InstallerUrl: https://github.com/Corsinvest/cv4pve-node-protect/releases/download/v1.0.0/cv4pve-node-protect.exe-win-arm64.zip
+  InstallerSha256: PLACEHOLDER_SHA256_ARM64
+  NestedInstallerType: portable
+  NestedInstallerFiles:
+  - RelativeFilePath: cv4pve-node-protect.exe
+    PortableCommandAlias: cv4pve-node-protect
+ManifestType: installer
+ManifestVersion: 1.10.0

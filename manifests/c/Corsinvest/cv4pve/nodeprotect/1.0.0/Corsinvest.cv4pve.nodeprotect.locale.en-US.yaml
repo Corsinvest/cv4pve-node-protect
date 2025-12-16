@@ -1,0 +1,45 @@
+# Created using wingetcreate 1.10.3.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.nodeprotect
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-node-protect
+PackageUrl: https://github.com/Corsinvest/cv4pve-node-protect
+License: GPL-3.0-only
+LicenseUrl: https://github.com/Corsinvest/cv4pve-node-protect/blob/master/LICENSE.md
+Copyright: Copyright (c) 2019-2025 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-node-protect/blob/master/LICENSE.md
+ShortDescription: Node Protection Tool for Proxmox VE
+Description: |-
+  cv4pve-node-protect is a node configuration backup tool for Proxmox VE.
+  It creates backups of node configuration files using SSH and supports retention policies.
+
+  Features:
+  - Automatic node configuration backup via SSH
+  - Support for multiple nodes simultaneously
+  - Configurable retention policies
+  - Custom path selection for backup
+  - Upload/restore configuration capabilities
+  - Automated cleanup of old backups
+  - Compression (tar.gz format)
+  - Directory organization by timestamp
+Moniker: cv4pve-node-protect
+Tags:
+- automation
+- backup
+- configuration
+- corsinvest
+- node
+- protect
+- proxmox
+- proxmoxve
+- ssh
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-node-protect/releases/tag/v1.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
