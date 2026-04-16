@@ -4,5 +4,5 @@ long-description=Backup Proxmox VE node configuration files via SSH.
 license=GPL-3.0-only
 winget-id=Corsinvest.cv4pve.nodeprotect
 pkg-identifier=it.corsinvest.cv4pve-node-protect
-nuget-project-path=src/Corsinvest.ProxmoxVE.NodeProtect/Corsinvest.ProxmoxVE.NodeProtect.csproj
+nuget-project-path=src/Corsinvest.ProxmoxVE.NodeProtect.Api/Corsinvest.ProxmoxVE.NodeProtect.Api.csproj
 homebrew-formula-class=Cv4pveNodeProtect
