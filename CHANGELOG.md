@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.1] - 2026-04-16
+## [2.1.0] - 2026-04-17
+
+### Added
+- **IPv6 support** in `--host` — you can now target nodes by IPv6 address. Use brackets if you also specify a port: `[fe80::1]:2222`. Without a port, brackets are optional: `fe80::1`
+
+### Changed
+- **Backup no longer uses temporary files on the node** — the archive is streamed directly from the Proxmox node into your local file. Nothing is written to `/tmp` on the node, so crashes or interrupted runs don't leave leftover files behind
+- Hosts, paths and SSH ports that contain unusual characters are now handled safely
+- Console output is shorter and easier to read: "Create config" and "Delete Backup" show the folder name instead of the full path
 
 ### Fixed
 - The NuGet package now publishes the `Corsinvest.ProxmoxVE.NodeProtect.Api` library instead of the console executable, so other projects can depend on the backup engine as a library

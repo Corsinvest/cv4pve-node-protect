@@ -85,7 +85,8 @@ cv4pve-node-protect @config.rsp backup --directory-work=/backup --paths="/etc/."
 - **Selective paths** — choose exactly what to archive with `--paths` (semicolon separated)
 - **Retention** — `--keep=N` automatically prunes older backup folders
 - **Multiple auth** — password, password from file, or SSH private key (with optional passphrase)
-- **Custom SSH port** — per host: `host:port,host2:port`
+- **Custom SSH port** — per host: `host:port,host2:port` (IPv6 addresses use brackets: `[::1]:2222`)
+- **IPv6 support** — IPv4, IPv6 and hostname all accepted
 - **Timestamp folders** — backups organized as `YYYY-MM-DD-HH-mm-ss/{host}-config.tar.gz`
 - **Agentless** — only SSH required on the target nodes, no software installed
 - **Cross-platform** — Windows, Linux, macOS — native single binary
@@ -126,12 +127,19 @@ The tool uses **plain SSH** — it does not use the Proxmox API. Any Linux user 
 
 ### Host Syntax
 
+Comma-separated list of hosts. Each entry is `host[:port]`. Default port is `22`.
+
 ```
 --host=host1                              # single host, default port 22
 --host=host1:2222                         # single host, custom port
---host=192.168.1.100,192.168.1.101        # multiple hosts
+--host=192.168.1.100,192.168.1.101        # multiple hosts (IPv4)
 --host=host1:2222,host2:2222              # multiple hosts, custom ports
+--host=fe80::1                            # single IPv6 address, default port
+--host=[fe80::1]:2222                     # IPv6 with custom port (brackets required)
+--host=[::1]:22,pve01,192.168.1.10        # mix IPv6, hostname and IPv4
 ```
+
+**IPv6 note**: when specifying a port with an IPv6 address, the address **must** be enclosed in square brackets to disambiguate the `:` used as port separator from the `:` inside the address (same convention as URLs, e.g. `http://[::1]:8080`). Without a port, brackets are optional.
 
 </details>
 
@@ -155,7 +163,7 @@ cv4pve-node-protect [global-options] backup [backup-options]
 
 | Option | Description |
 |--------|-------------|
-| `--host` | Target host(s): `host[:port],host2[:port],…` |
+| `--host` | Target host(s): `host[:port],host2[:port],…` (IPv4, IPv6 in brackets `[::1]:22`, or hostname) |
 | `--username` | SSH username |
 | `--password` | SSH password or `file:/path` |
 | `--private-key-file` | Path to SSH private key |
