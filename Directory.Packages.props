@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Extension" Version="9.1.14" />
-    <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Console" Version="9.1.14" />
+    <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Extension" Version="9.1.15" />
+    <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Console" Version="9.1.15" />
     <PackageVersion Include="SSH.NET" Version="2025.1.0" />
   </ItemGroup>
 </Project>
