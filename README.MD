@@ -199,6 +199,9 @@ After the backup completes, folders beyond `--keep` (oldest first) are deleted.
 | `/etc/pve/` | Proxmox cluster config (storage, firewall, VMs, HA, SDN, …) |
 | `/root/.` | Root user config (incl. `.ssh`) |
 | `/var/lib/ceph/.` | Ceph configuration (if used) |
+| `/var/spool/cron/crontabs` | Per-user cron jobs created via `crontab -e` (not in `/etc/`) |
+
+Missing paths are silently skipped (tar runs with `--ignore-failed-read`), so you can list optional paths without breaking the run.
 
 ---
 
