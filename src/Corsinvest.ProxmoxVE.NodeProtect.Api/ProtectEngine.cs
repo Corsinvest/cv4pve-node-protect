@@ -91,8 +91,9 @@ public class ProtectEngine(ILogger<ProtectEngine> logger)
         await sshClient.ConnectAsync(cancellationToken);
 
         var quotedPaths = string.Join(" ", paths.Select(ShellQuote));
-        // -f - streams the archive to stdout so we can pipe it over SSH without touching disk on the node
-        using var cmd = sshClient.CreateCommand($"tar --one-file-system -czPf - {quotedPaths}");
+        // -f - streams the archive to stdout so we can pipe it over SSH without touching disk on the node.
+        // --ignore-failed-read tolerates paths that don't exist on the node instead of failing the whole run.
+        using var cmd = sshClient.CreateCommand($"tar --one-file-system --ignore-failed-read -czPf - {quotedPaths}");
 
         logger.LogDebug("[{Node}] Executing: {Cmd}", node, cmd.CommandText);
 
