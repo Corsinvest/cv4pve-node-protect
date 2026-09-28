@@ -17,3 +17,8 @@ License: MIT
 
 [Microsoft.Extensions.Logging](https://github.com/dotnet/runtime)
 License: MIT
+
+## Artwork
+
+The shield pictogram in `icon.svg` / `icon.png` comes from [Lucide](https://lucide.dev) (icon `shield-check`)
+License: ISC
