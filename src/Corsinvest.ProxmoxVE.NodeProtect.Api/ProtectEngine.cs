@@ -26,7 +26,14 @@ public class ProtectEngine(ILogger<ProtectEngine> logger)
     /// </summary>
     public const string DateFormat = "yyyy-MM-dd-HH-mm-ss";
 
-    private static string ShellQuote(string value)
+    /// <summary>
+    /// The command run on the node. <c>-f -</c> streams the archive to stdout, so it goes over SSH
+    /// without touching the node's disk; <c>--ignore-failed-read</c> tolerates paths that do not exist.
+    /// </summary>
+    internal static string BuildTarCommand(IEnumerable<string> paths)
+        => $"tar --one-file-system --ignore-failed-read -czPf - {string.Join(" ", paths.Select(ShellQuote))}";
+
+    internal static string ShellQuote(string value)
     {
         if (value.Contains('\''))
         {
@@ -88,15 +95,14 @@ public class ProtectEngine(ILogger<ProtectEngine> logger)
         ArgumentNullException.ThrowIfNull(paths);
         ArgumentNullException.ThrowIfNull(destination);
 
+        // Built before connecting: an invalid path fails without touching the node
+        var command = BuildTarCommand(paths);
         var sw = Stopwatch.StartNew();
 
         using var sshClient = new SshClient(connectionInfo);
         await sshClient.ConnectAsync(cancellationToken);
 
-        var quotedPaths = string.Join(" ", paths.Select(ShellQuote));
-        // -f - streams the archive to stdout so we can pipe it over SSH without touching disk on the node.
-        // --ignore-failed-read tolerates paths that don't exist on the node instead of failing the whole run.
-        using var cmd = sshClient.CreateCommand($"tar --one-file-system --ignore-failed-read -czPf - {quotedPaths}");
+        using var cmd = sshClient.CreateCommand(command);
 
         logger.LogDebug("[{Node}] Executing: {Cmd}", node, cmd.CommandText);
 
