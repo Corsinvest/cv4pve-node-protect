@@ -1,0 +1,43 @@
+---
+title: Options
+description: Every command and option of cv4pve-node-protect, with defaults and checks.
+---
+
+```bash
+cv4pve-node-protect [global options] backup [backup options]
+```
+
+`backup` is the only command. Global options go before it, backup options after it.
+
+## Global options
+
+| Option | Default | Description |
+|---|---|---|
+| `--host` | *(required)* | Nodes to back up, comma-separated, each `host[:port]`: host name, IPv4, IPv6 (in brackets with a port, `[fe80::1]:2222`). See [Hosts](../getting-started/#hosts). |
+| `--username` | — | SSH user. Always needed; use `root` — see [Which account](../ssh-access/#which-account). |
+| `--password` | — | SSH password, or `file:/path` to read it from a file. |
+| `--private-key-file` | — | SSH private key; the file must exist. When given, the password is not used. |
+| `--passphrase` | — | Passphrase of the private key, if it has one. |
+| `--timeout` | 30 | SSH connection timeout in seconds. |
+| `--debug`, `--log-level` | — | Hidden diagnostic options — see [Troubleshooting](../troubleshooting/). |
+| `--version` | — | Prints the version. |
+| `-h`, `--help` | — | Help; `backup --help` for the backup options. |
+
+## backup
+
+| Option | Default | Description |
+|---|---|---|
+| `--paths` | *(required)* | Paths on the node to archive, separated by `;`. See [What to back up](../what-to-back-up/). |
+| `--directory-work` | *(required)* | Local folder for the archives; it must exist. See [Archives and retention](../archive/). |
+| `--keep` | *(required)* | Number of dated folders to keep, 1 to 100. See [Retention](../archive/#retention). |
+
+## Response files
+
+`@file` in place of options reads them from a file — see [Response files](../ssh-access/#response-files).
+
+## Exit code
+
+| Code | Meaning |
+|---|---|
+| 0 | Every node backed up, retention applied. Skipped paths do not change it. |
+| 1 | Wrong options, or a run stopped on an error — see [When a run fails](../archive/#when-a-run-fails). |

@@ -1,0 +1,69 @@
+---
+title: Archives and retention
+description: Where cv4pve-node-protect writes the archives, their format, how --keep removes old ones and what happens when a run fails.
+---
+
+## Layout
+
+Each run creates one folder under `--directory-work`, named after the **local** date and time of the
+machine running the tool, with one archive per node:
+
+```text
+/srv/node-protect/
+├── 2026-09-28-03-00-01/
+│   ├── pve01-config.tar.gz
+│   ├── pve02-config.tar.gz
+│   └── pve03-config.tar.gz
+└── 2026-09-29-03-00-01/
+    ├── pve01-config.tar.gz
+    ├── pve02-config.tar.gz
+    └── pve03-config.tar.gz
+```
+
+- The folder name is `yyyy-MM-dd-HH-mm-ss`, so sorting by name is sorting by date.
+- The archive name is the host **as written in `--host`**, without the port, followed by
+  `-config.tar.gz`. On Windows an IPv6 address cannot be part of a file name: use a host name there.
+- `--directory-work` must exist; the tool creates only the dated folders inside it.
+
+## Format
+
+A gzip-compressed tar archive, made by GNU `tar` on the node, with owners, groups and permissions of
+every file. The entries keep their absolute path (`/etc/./hostname`); the extraction tools remove the
+leading `/`, so extracting into a folder is safe — see [Restore](../restore/).
+
+Any tar tool reads them: `tar` on Linux and macOS, the `tar.exe` included in Windows 10 and later.
+
+```bash
+tar -tzvf pve01-config.tar.gz            # list, with permissions and dates
+tar -xzf pve01-config.tar.gz -C restore  # extract into ./restore
+```
+
+## Retention
+
+After all nodes are backed up, `--keep=N` (1 to 100, required) keeps the `N` most recent dated
+folders and deletes the others, printing `Delete Backup: <folder>` for each.
+
+Only folders whose name is a date in the format above are counted and deleted. Anything else in
+`--directory-work` is left alone, so you can keep notes or other files there.
+
+To keep daily, weekly and monthly copies, use one `--directory-work` per schedule, each with its own
+`--keep` — see [Scheduling](../scheduling/).
+
+## When a run fails
+
+The nodes are backed up one after the other. The first error — a node that does not answer, a refused
+login, a `tar` failure — **stops the whole run**, with exit code 1:
+
+- the nodes after the failing one are **not** backed up;
+- the half-written archive of the failing node is deleted;
+- retention does **not** run;
+- the dated folder of that run stays, with the archives of the nodes done before the error, or empty.
+
+That folder has a date name, so the next runs count it as one of the `--keep` folders. After several
+failed runs in a row, good backups can be deleted to make room for empty folders. Check the exit
+code of scheduled runs, and remove empty or incomplete folders after a failure.
+
+While a node is down for maintenance, take it out of `--host`, or put it last.
+
+A `tar` that ends with exit code 1 — some file changed while it was read, common on a running system —
+is **not** an error: the archive is kept.

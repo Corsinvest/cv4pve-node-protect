@@ -1,0 +1,186 @@
+---
+title: Restore
+description: How to get a Proxmox VE node's configuration back from a cv4pve-node-protect archive — a single file, a reinstalled node in a cluster, or a lost node.
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+cv4pve-node-protect has **no restore command**, on purpose. Putting configuration back on a
+hypervisor is not a copy of every file: some files must go back, some must not, and some belong to
+the cluster rather than to the node. The archives are plain `tar.gz` files, so you choose what goes
+where, with standard tools.
+
+:::danger[Never extract with `-P`, never extract into `/`]
+The entries have absolute names (`/etc/./network/interfaces`). With `tar -P`, `tar` writes them to
+those absolute paths **even when you give `-C <folder>`**: a "test" extraction overwrites the live
+system. Without `-P`, `tar` removes the leading `/` and everything lands inside the folder you choose.
+Always extract into a staging folder, and copy back only the files you checked.
+:::
+
+## Get the files out
+
+<Steps>
+
+1. **Choose the archive.** Folder = date of the run, file = node:
+   `2026-09-29-03-00-01/pve01-config.tar.gz`. Make sure it is the node you want: the file name is the
+   host as it was written in `--host`, and `/etc/hostname` inside tells you which node it came from.
+
+2. **Copy it to where you work** — the node itself, or any Linux machine to read it:
+
+   ```bash
+   scp 2026-09-29-03-00-01/pve01-config.tar.gz root@pve01:/root/
+   ```
+
+3. **List it** and find the exact name of what you need:
+
+   ```bash
+   tar -tzf pve01-config.tar.gz | grep network/interfaces
+   ```
+
+   ```text
+   /etc/./network/interfaces.d/
+   /etc/./network/interfaces
+   ```
+
+4. **Extract into a staging folder**, the whole archive or only some entries, with their names as
+   listed:
+
+   ```bash
+   mkdir -p /root/restore
+   tar -xzf pve01-config.tar.gz -C /root/restore                                 # everything
+   tar -xzf pve01-config.tar.gz -C /root/restore /etc/./network/interfaces      # one file
+   ```
+
+   The files land in `/root/restore/etc/network/interfaces` and so on, with their permissions.
+
+5. **Compare** with the live file before replacing it:
+
+   ```bash
+   diff -u /etc/network/interfaces /root/restore/etc/network/interfaces
+   ```
+
+</Steps>
+
+Then pick the case below.
+
+## A single node file
+
+A file under `/etc` changed by mistake — `network/interfaces`, `hosts`, a file in `modprobe.d`:
+copy it back from the staging folder and apply it as you would after editing it by hand. For the
+network, `ifreload -a` applies `/etc/network/interfaces` (or use *Apply Configuration* in the node's
+*Network* panel); for other files, restart the service that reads them, or reboot.
+
+```bash
+cp -a /root/restore/etc/network/interfaces /etc/network/interfaces
+ifreload -a
+```
+
+A wrong network configuration can cut you off from the node: do it from the console, or with a way
+back.
+
+## A file in /etc/pve
+
+`/etc/pve` is shared by all nodes of the cluster: a file written there on one node is on all of them.
+Use it to take back one definition — `storage.cfg`, a job, a firewall rule, the configuration of a
+guest deleted by mistake.
+
+If you backed up `/etc/pve/.`, the file is in the staging folder:
+
+```bash
+tar -xzf pve01-config.tar.gz -C /root/restore /etc/pve/./storage.cfg
+diff -u /etc/pve/storage.cfg /root/restore/etc/pve/storage.cfg
+cp /root/restore/etc/pve/storage.cfg /etc/pve/storage.cfg
+```
+
+Only with `/var/lib/pve-cluster/.` in the archive, read the file from the database — see
+[Read a file from config.db](#read-a-file-from-configdb).
+
+The cluster must have quorum for `/etc/pve` to be writable. A guest configuration goes back under
+`/etc/pve/nodes/<node>/qemu-server/` (VMs) or `lxc/` (containers) of the node that should own it, and
+only if no other guest uses that ID; its disks are not in the archive.
+
+## A reinstalled node in a working cluster
+
+The common case: one node's disk failed, the other nodes run. The cluster still has the whole of
+`/etc/pve`; what went lost is the node's own configuration.
+
+<Steps>
+
+1. Remove the dead node from the cluster and reinstall it, as the Proxmox VE documentation describes
+   in [Remove a cluster node](https://pve.proxmox.com/pve-docs/chapter-pvecm.html#pvecm_remove_node).
+   Its guests can be moved to the running nodes meanwhile:
+   [Recovering/moving guests from failed nodes](https://pve.proxmox.com/pve-docs/chapter-pmxcfs.html#_recovering_moving_guests_from_failed_nodes).
+
+2. Reinstall Proxmox VE. With the same host name and address as before, run `pvecm updatecerts` on it
+   after joining if the other nodes report an SSH error, as the page above says. `etc/hostname`, `etc/hosts` and
+   `etc/network/interfaces` in the archive tell you what they were.
+
+3. Before joining the cluster, put back the node's own files from the staging folder: network
+   configuration (bridges, bonds, VLANs), `/etc/hosts`, apt sources, `modprobe.d`, `kernel/cmdline`,
+   storage-related configuration the node needs (multipath, iSCSI), crontabs, your scripts. Apply the
+   network and check the node reaches the others.
+
+4. Join the cluster as the documentation says in
+   [Adding nodes to the cluster](https://pve.proxmox.com/pve-docs/chapter-pvecm.html#pvecm_join_node_to_cluster).
+   The node receives `/etc/pve` from the cluster.
+
+</Steps>
+
+:::caution[What not to copy on a node that joins a cluster]
+Do **not** put back `/etc/pve`, `/var/lib/pve-cluster/config.db` or `/etc/corosync` on a node that
+joins a working cluster: it gets them from the other nodes when it joins, and old copies would conflict
+with the current ones.
+:::
+
+## A lost node: restore the cluster database
+
+For a standalone node, or when no other node holds the configuration, the Proxmox VE documentation
+describes the [recovery](https://pve.proxmox.com/pve-docs/chapter-pmxcfs.html#_recovery) of
+`config.db` on a new host: on the new host, with nothing running, stop `pve-cluster`, replace
+`/var/lib/pve-cluster/config.db` (mode `0600`), adapt `/etc/hostname` and `/etc/hosts` to the lost
+host, reboot. Follow it there; the steps below prepare the file.
+
+### Restore the cluster database
+
+The archive holds `config.db` **with** `config.db-wal`, where the most recent changes are
+([why](../what-to-back-up/#the-cluster-database-is-copied-while-in-use)). Merge them into
+`config.db` in the staging folder before using it — never on the live file:
+
+```bash
+tar -xzf pve01-config.tar.gz -C /root/restore /var/lib/pve-cluster/.
+cd /root/restore/var/lib/pve-cluster
+sqlite3 config.db 'PRAGMA integrity_check;'   # must print: ok
+ls                                            # config.db-wal and config.db-shm are gone
+```
+
+SQLite applies `config.db-wal` when it opens the database and merges it into `config.db` when it
+closes it, so after the check `config.db` is complete on its own. Until then keep the three files
+together: `config.db` alone is an older state. Install `sqlite3` with `apt install sqlite3` if it is
+missing.
+
+Then follow the documentation linked above with this `config.db`. For a node that was part of a
+cluster, the database brings back the cluster membership too: plan the recovery of a whole cluster
+with care, or [ask for support](https://www.corsinvest.it/en/contact/).
+
+### Read a file from config.db
+
+`config.db` has one table, `tree`: each row is a file or folder of `/etc/pve`, with its `name`, its
+`parent` (0 is the root of `/etc/pve`) and its content in `data`. On a **copy** in the staging folder:
+
+```bash
+sqlite3 config.db "SELECT writefile('/root/restore/storage.cfg', data) FROM tree WHERE parent = 0 AND name = 'storage.cfg';"
+```
+
+`writefile` writes the content byte for byte and prints its size.
+
+Names are not unique across folders — each node has its own `host.fw`, for instance. List the matches
+with their `inode` and `parent`, and follow `parent` up to the folder you want:
+
+```bash
+sqlite3 config.db "SELECT inode, parent, name FROM tree WHERE name = 'host.fw';"
+```
+
+## Practice before you need it
+
+Restore one file from last night's archive on a test node now, not during an outage: you learn where
+things are, and you find out whether the archive has what you expect.

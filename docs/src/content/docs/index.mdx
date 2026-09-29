@@ -1,0 +1,91 @@
+---
+title: cv4pve-node-protect
+description: Configuration backup for Proxmox VE nodes over SSH — network, storage, cluster database and certificates in one tar.gz per node, with retention.
+template: splash
+hero:
+  title: Back up the configuration of your <span class="accent-mark">Proxmox VE</span> nodes
+  tagline: Runs outside the nodes, over SSH — one tar.gz per node with the files you choose, from /etc/network/interfaces to the cluster database, in dated folders with automatic retention.
+  actions:
+    - text: Get started
+      link: /cv4pve-node-protect/getting-started/
+      icon: right-arrow
+    - text: How to restore
+      link: /cv4pve-node-protect/restore/
+      variant: minimal
+---
+
+import FeatureGrid from '@corsinvest/cv4pve-docs-theme/components/FeatureGrid.astro';
+import CtaBand from '@corsinvest/cv4pve-docs-theme/components/CtaBand.astro';
+import proxmoxLogo from '../../assets/proxmox-logo.svg';
+
+export const features = [
+  { title: 'The whole cluster in one run', text: 'Pass every node in --host: one archive per node, all in the same dated folder.', href: 'archive/' },
+  { title: 'You choose what goes in', text: '/etc, the readable /etc/pve files, the cluster database, crontabs, root SSH keys, your own scripts.', href: 'what-to-back-up/' },
+  { title: 'Nothing left on the nodes', text: 'tar writes to the SSH channel and the archive lands straight in your local file: no temporary files, no agent.', href: 'ssh-access/' },
+  { title: 'Retention built in', text: '--keep removes the oldest dated folders after each run, and never touches other folders.', href: 'archive/#retention' },
+  { title: 'A restore you control', text: 'Plain tar.gz files: extract to a staging folder, compare, then put back only what you need.', href: 'restore/' },
+  { title: 'Scheduled and scriptable', text: 'cron or Task Scheduler, response files for the connection, exit code 1 when a run fails.', href: 'scheduling/' },
+];
+
+## Why
+
+Proxmox VE backup jobs save your VMs and containers, not the node they run on. The node has its own
+configuration: bridges, bonds and VLANs in `/etc/network/interfaces`, `/etc/hosts`, storage
+definitions, the cluster configuration in `/etc/pve`, certificates, SSH keys, apt repositories,
+kernel parameters, the cron jobs and scripts you added.
+
+When a node's boot disk dies, or someone breaks a file by mistake, that configuration has to come
+back. Rebuilding it by hand from memory and screenshots is slow and easy to get wrong: a bridge with
+a different name, a missing VLAN, and guests do not start on the reinstalled node.
+
+cv4pve-node-protect copies those files from every node into a dated `tar.gz`, on a schedule, so you
+can compare what changed and put back exactly what was there.
+
+## Where it fits
+
+The cv4pve suite follows the Unix philosophy: each tool does one thing and does it well.
+cv4pve-node-protect protects the node, the other tools the guests and the knowledge of the cluster.
+
+| Tool | Protects | How |
+|---|---|---|
+| **cv4pve-node-protect** | Node configuration files | SSH, `tar.gz` per node |
+| [Proxmox VE backup](https://pve.proxmox.com/pve-docs/chapter-vzdump.html) / Proxmox Backup Server | VMs and containers | Built into Proxmox VE |
+| [cv4pve-autosnap](https://github.com/Corsinvest/cv4pve-autosnap) | VM and container snapshots on a schedule | Proxmox VE API |
+| [cv4pve-report](https://corsinvest.github.io/cv4pve-report/) | A readable inventory of the cluster, to document it | Proxmox VE API |
+
+Prefer a web interface with scheduled backups? [cv4pve-admin](https://github.com/Corsinvest/cv4pve-admin)
+runs the same engine as its [Node Protect](https://corsinvest.github.io/cv4pve-admin/modules/node-protect/) module.
+
+## Outside the nodes, over SSH
+
+cv4pve-node-protect runs outside the cluster — on your workstation, a management VM or the machine
+that keeps your backups — and connects to each node over **SSH**, not through the Proxmox VE API.
+On every node it runs a single `tar` command and streams the archive back; nothing is installed and
+nothing is written on the node.
+
+Reading the whole configuration needs `root`, and the archives hold secrets such as `/etc/shadow`,
+SSH keys and storage passwords. [SSH access and security](/cv4pve-node-protect/ssh-access/)
+explains the account, the host key and how to keep the archives safe — read it before the first run.
+
+## What an archive contains
+
+One run with the [recommended paths](/cv4pve-node-protect/what-to-back-up/) on a node of our test
+cluster, grouped (about 1 MB compressed):
+
+| Part | Examples |
+|---|---|
+| Network | `/etc/network/interfaces`, `/etc/hosts`, `/etc/hostname`, `/etc/resolv.conf` |
+| System | `/etc/fstab`, `/etc/kernel/cmdline`, `/etc/modprobe.d/`, `/etc/apt/sources.list.d/`, `/etc/vzdump.conf`, `/etc/zfs/`, `/etc/lvm/` |
+| Cluster | `/etc/corosync/corosync.conf`, and `/var/lib/pve-cluster/config.db`: the database behind `/etc/pve` |
+| `/etc/pve` as files | `storage.cfg`, `datacenter.cfg`, `user.cfg`, `jobs.cfg`, firewall rules, guest configurations, node certificates `pve-ssl.pem` / `pve-ssl.key`, `priv/` |
+| Accounts and keys | `/etc/shadow`, SSH host keys, `/root/.ssh/`, `/var/spool/cron/crontabs/` |
+
+## What it does for you
+
+<FeatureGrid items={features} />
+
+<CtaBand
+  title="Take your first node backup"
+  text="Download the binary, point it at your nodes over SSH, open the archive."
+  proxmoxLogo={proxmoxLogo}
+/>

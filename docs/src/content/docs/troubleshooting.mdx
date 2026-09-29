@@ -1,0 +1,39 @@
+---
+title: Troubleshooting
+description: How to see what cv4pve-node-protect is doing, and the errors you may meet.
+---
+
+import CliTroubleshooting from '@corsinvest/cv4pve-docs-theme/components/CliTroubleshooting.astro';
+
+<CliTroubleshooting api={false} />
+
+## Common errors
+
+Errors end the run with exit code 1. Errors in the options are printed with the help of the command;
+the others as `ERROR: <message>`.
+
+| Message | Cause |
+|---|---|
+| `Connection has timed out.` | The node did not answer within `--timeout` seconds (30 by default): wrong address or port, node down, firewall. |
+| `Permission denied (password).` / `Permission denied (publickey).` | The node refused the user and the password, or the key. |
+| `Username is required!` | `--private-key-file` without `--username`. |
+| `Option '--password' is required when using '--username' without a private key!` | Neither a password nor a key was given. |
+| `Option … whit value '…' is not a valid file!` | The folder in `--directory-work` does not exist (the message says "file" for folders too). Create it first. |
+| `Password file not found: …` | The file after `--password=file:` does not exist. |
+| `Path must not contain single quotes: …` | A path in `--paths` contains `'`, which the tool does not accept. |
+| `[node] tar failed (exit 2): …` | `tar` on the node failed; its own error message follows. |
+
+When a run stops on an error, the nodes after the failing one are not backed up and retention is not
+applied — see [When a run fails](../archive/#when-a-run-fails).
+
+## The archive is smaller than expected
+
+No message tells you that a path was skipped. List the archive and look for what you expected:
+
+```bash
+tar -tzf pve01-config.tar.gz | grep -E 'config.db|network/interfaces'
+```
+
+The usual causes: a typo in `--paths`, a user other than `root` ([Which account](../ssh-access/#which-account)),
+or a path on another file system, such as `/etc/pve` inside `/etc/.`
+([why](../what-to-back-up/#why-etc-misses-etcpve)).

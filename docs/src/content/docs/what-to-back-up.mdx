@@ -1,0 +1,64 @@
+---
+title: What to back up
+description: Which paths of a Proxmox VE node to pass to --paths, why /etc alone misses /etc/pve, and what the cluster database is.
+---
+
+`--paths` is required and has no default: the archive contains exactly the paths you list, separated
+by `;`. Quote the list, because `;` separates commands in every shell.
+
+## Recommended paths
+
+```bash
+--paths='/etc/.;/etc/pve/.;/var/lib/pve-cluster/.;/var/spool/cron/crontabs;/root/.ssh'
+```
+
+| Path | What it holds | Why |
+|---|---|---|
+| `/etc/.` | The node's own configuration: `network/interfaces`, `hosts`, `hostname`, `resolv.conf`, `fstab`, `kernel/cmdline`, `modprobe.d/`, apt sources, `vzdump.conf`, `corosync/`, ZFS and LVM configuration, SSH host keys | Everything you would otherwise rebuild by hand after reinstalling the node |
+| `/etc/pve/.` | The cluster configuration as readable files: `storage.cfg`, `datacenter.cfg`, `user.cfg`, `jobs.cfg`, firewall rules, guest configurations, certificates, `priv/` | To take back a single file: a storage definition, a VM configuration |
+| `/var/lib/pve-cluster/.` | `config.db`: the database the files of `/etc/pve` are stored in | The unit the Proxmox VE documentation restores when a node is lost — see [Restore](../restore/) |
+| `/var/spool/cron/crontabs` | Cron jobs created with `crontab -e` | They are not under `/etc` |
+| `/root/.ssh` | root's keys and `authorized_keys` | Access to and from the other nodes and your scripts |
+
+Add the folders where you keep your own scripts or files, such as `/root/scripts`. The
+[cv4pve-admin](https://corsinvest.github.io/cv4pve-admin/modules/node-protect/) module starts from
+a similar list and also includes `/var/lib/ceph/.`: we have not measured it on a Ceph cluster, so check
+the size of the archive if you add it.
+
+## Why `/etc/.` misses `/etc/pve`
+
+`/etc/pve` is not a normal folder: it is **pmxcfs**, the Proxmox cluster file system, mounted on top
+of `/etc`. The tool runs `tar` with `--one-file-system`, which does not enter other file systems
+mounted inside a path. So `/etc/.` gives you everything in `/etc` **except** `/etc/pve`.
+
+The content of `/etc/pve` is saved in two ways, and you want both:
+
+- **`/var/lib/pve-cluster/.`** — pmxcfs keeps all of `/etc/pve` in the SQLite database
+  `config.db`. This is the file the [Proxmox VE documentation](https://pve.proxmox.com/pve-docs/chapter-pmxcfs.html#_recovery)
+  moves to a new host to recover a node.
+- **`/etc/pve/.`** listed explicitly — `tar` archives a path given on the command line even when it is a
+  separate file system, so you get the same content as plain files you can open and copy back one by
+  one.
+
+The same rule applies to anything else mounted under a path you list: it is left out, and you have to
+list it on its own.
+
+## The cluster database is copied while in use
+
+`config.db` works with a write-ahead log: the latest changes sit in `config.db-wal` next to it, not yet
+in `config.db`. `/var/lib/pve-cluster/.` saves both, together with `config.db-shm`. Keep the three
+files together: `config.db` alone is an **older** state of the configuration. [Restore](../restore/#restore-the-cluster-database)
+shows how to merge them.
+
+The files are read while pmxcfs is running, as with any file-level copy of a live database. In our
+tests the copies opened with SQLite passed its integrity check; the readable copy of `/etc/pve/.` is a
+second source if one day it does not.
+
+## Path syntax
+
+- Use absolute paths. The archive stores them as written: with `/etc/.` the entries are named
+  `/etc/./network/interfaces`, with `/etc` they are `/etc/network/interfaces`. You need the exact name
+  to extract a single file — list the archive first.
+- A path that does not exist on the node is skipped in silence, so the same list works on nodes with
+  and without, say, `/root/scripts`. It also means a typo is not reported.
+- A path cannot contain a single quote `'`.

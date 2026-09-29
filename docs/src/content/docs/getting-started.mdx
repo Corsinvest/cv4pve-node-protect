@@ -1,0 +1,95 @@
+---
+title: Getting started
+description: Install cv4pve-node-protect, connect it to your Proxmox VE nodes over SSH and take the first backup.
+---
+
+import CliInstall from '@corsinvest/cv4pve-docs-theme/components/CliInstall.astro';
+
+cv4pve-node-protect runs **outside the cluster** — on your workstation, a management VM or the machine
+that keeps your backups — and connects to each node over **SSH** (port 22 unless you say otherwise).
+It does not use the Proxmox VE API and nothing is installed on the nodes.
+
+## Installation
+
+<CliInstall repo="cv4pve-node-protect" winget="Corsinvest.cv4pve.nodeprotect" />
+
+## Before the first run
+
+- **SSH access as `root` to every node.** A key is better than a password; the reasons, and why
+  another user gives incomplete archives, are in [SSH access and security](../ssh-access/).
+- **A local folder for the archives.** It must already exist: the tool does not create it.
+  The archives contain secrets, so give it restrictive permissions.
+
+## First backup
+
+```bash
+mkdir -p /srv/node-protect && chmod 700 /srv/node-protect
+
+cv4pve-node-protect --host=pve01,pve02,pve03 \
+  --username=root --private-key-file=/root/.ssh/id_ed25519 \
+  backup --paths='/etc/.;/etc/pve/.;/var/lib/pve-cluster/.' \
+  --directory-work=/srv/node-protect --keep=7
+```
+
+The connection options go **before** `backup`, the backup options after it. To avoid repeating them,
+put them in a [response file](../ssh-access/#response-files). The output:
+
+```text
+ACTION Backup
+Keep: 7
+Directory Work: /srv/node-protect
+Directory Node to archive:
+/etc/.
+/etc/pve/.
+/var/lib/pve-cluster/.
+Create config: 2026-09-29-03-00-01/pve01-config.tar.gz
+Create config: 2026-09-29-03-00-01/pve02-config.tar.gz
+Create config: 2026-09-29-03-00-01/pve03-config.tar.gz
+```
+
+Each run creates a folder named after the local date and time, with one archive per node. From the
+eighth run on, `--keep=7` deletes the oldest folder and prints `Delete Backup: <folder>`.
+See [Archives and retention](../archive/).
+
+Check the first archive before you rely on it:
+
+```bash
+tar -tzvf /srv/node-protect/2026-09-29-03-00-01/pve01-config.tar.gz | less
+```
+
+:::caution[A missing file is not an error]
+Paths that do not exist on the node, and files the SSH user cannot read, are skipped **without any
+message** and the run still ends with exit code 0. A typo in `--paths` gives an archive of a few dozen
+bytes. Look inside the archive once, and after every change of `--paths` or of the SSH user.
+:::
+
+## Hosts
+
+`--host` takes a comma-separated list; each entry is `host[:port]`:
+
+```bash
+--host=pve01                        # hostname, port 22
+--host=pve01:2222                   # custom port
+--host=192.168.1.10,192.168.1.11    # several nodes, IPv4
+--host=fe80::1                      # IPv6 without port
+--host=[fe80::1]:2222               # IPv6 with port: brackets required
+--host=[::1]:22,pve01,192.168.1.10  # mixed
+```
+
+The nodes are backed up one after the other, in the order given. The archive takes its name from the
+host **as you wrote it**: `--host=192.168.1.10` gives `192.168.1.10-config.tar.gz`, so use node names
+if you want archives named after the nodes.
+
+:::note[IPv6 on Windows]
+An IPv6 address becomes part of the file name, and Windows does not allow `:` in file names: on
+Windows the run fails with a file name error. Use a host name that resolves to the IPv6 address.
+:::
+
+Unlike the API-based cv4pve tools, `--host` here is not a list of alternatives: every host in the list
+is backed up. If one of them fails, the run stops there — see [When a run fails](../archive/#when-a-run-fails).
+
+## Next
+
+- [What to back up](../what-to-back-up/): which paths, and why `/etc/.` alone misses `/etc/pve`.
+- [Scheduling](../scheduling/): cron and Task Scheduler.
+- [Restore](../restore/): how to get a node's configuration back from an archive.
