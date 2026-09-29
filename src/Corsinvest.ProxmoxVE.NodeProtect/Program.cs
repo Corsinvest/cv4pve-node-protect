@@ -45,7 +45,17 @@ internal partial class Program
 
         var optTimeout = app.AddOption<int?>("--timeout", "Timeout in seconds for ssh connection");
 
-        var loggerFactory = ConsoleHelper.CreateLoggerFactory<Program>(app.GetLogLevelFromDebug());
+        // ConsoleHelper.CreateLoggerFactory filters only Program and the PVE API client:
+        // the engine logs under its own category, so --debug / --log-level must reach it too.
+        var logLevel = app.GetLogLevelFromDebug();
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddFilter("Microsoft", LogLevel.Warning)
+                   .AddFilter("System", LogLevel.Warning)
+                   .AddFilter(typeof(Program).FullName, logLevel)
+                   .AddFilter(typeof(ProtectEngine).FullName, logLevel)
+                   .AddConsole();
+        });
 
         var cmdBackup = app.AddCommand("backup", "Backup configuration from nodes using ssh");
         var optKeep = cmdBackup.AddOption<int>("--keep", "Specify the number of backups to retain")
