@@ -55,7 +55,10 @@ public class ProtectEngine(ILogger<ProtectEngine> logger)
 
         try
         {
-            await using var fileStream = File.Create(targetFilePath);
+            // The archive contains secrets (shadow, keys, cluster database): owner only on Unix
+            var options = new FileStreamOptions { Mode = FileMode.Create, Access = FileAccess.Write };
+            if (!OperatingSystem.IsWindows()) { options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite; }
+            await using var fileStream = new FileStream(targetFilePath, options);
             return await BackupNodeToStreamAsync(node, connectionInfo, paths, fileStream, cancellationToken);
         }
         catch
@@ -106,6 +109,13 @@ public class ProtectEngine(ILogger<ProtectEngine> logger)
         if (cmd.ExitStatus >= 2)
         {
             throw new InvalidOperationException($"[{node}] tar failed (exit {cmd.ExitStatus}): {cmd.Error}");
+        }
+
+        // With --ignore-failed-read, missing or unreadable paths are only reported on stderr:
+        // surface them, or the archive silently lacks them
+        foreach (var line in cmd.Error.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            logger.LogWarning("[{Node}] {Message}", node, line);
         }
 
         sw.Stop();
