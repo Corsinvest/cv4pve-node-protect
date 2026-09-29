@@ -1,0 +1,72 @@
+---
+title: SSH access and security
+description: The SSH account cv4pve-node-protect needs on the Proxmox VE nodes, what it does not check, and how to protect the archives.
+---
+
+cv4pve-node-protect is the only cv4pve tool that does **not** use the Proxmox VE API: it copies files,
+such as `/etc/network/interfaces` or the cluster database, that the API does not hand out as files, so
+it reads them over SSH, as a shell user. That changes the security picture compared with an API token:
+this page says which account it needs, what it does not check and how to protect the archives.
+
+## Which account
+
+**Use `root`.** Many of the files worth saving can be read only by root: `/var/lib/pve-cluster/config.db`
+(mode `0600`), `/etc/shadow`, the SSH host keys, `/etc/pve/priv/`.
+
+With another user the backup does not fail: `tar` runs with `--ignore-failed-read`, so every file the
+user cannot read is **left out in silence** and the run ends with exit code 0. The archive looks fine
+and is incomplete. The tool runs `tar` directly and does not use `sudo`, so giving the user sudo rights
+changes nothing.
+
+## Authentication
+
+Prefer an **SSH key**: a password or passphrase on the command line is visible to other users of the
+machine in the process list and stays in the shell history. If you use a password, pass it with
+`--password=file:/path` or in an [options file](/cv4pve-node-protect/connection/#options-in-a-file),
+readable only by you. The options are in [Connection](/cv4pve-node-protect/connection/#options).
+
+Use a key made for this purpose, not your personal one. In the node's `/root/.ssh/authorized_keys`,
+OpenSSH's `from="…"` option limits it to the address of the machine that runs the backups:
+
+```text
+from="192.168.1.50" ssh-ed25519 AAAA… node-protect
+```
+
+## Host key: not verified
+
+The tool **does not check the node's SSH host key**: it accepts whatever key the server presents and
+does not read `known_hosts`. It cannot tell your node from a machine that answers in its place.
+
+On a network where someone can redirect the traffic:
+
+- with a **password**, the password is sent to whoever answers — root's password of your node;
+- with a **key**, the private key never leaves your machine, but the archive you receive may not come
+  from your node.
+
+Run it on a network you control (the management network of the cluster), and prefer key
+authentication.
+
+## The archives contain secrets
+
+A backup of `/etc/.`, `/etc/pve/.` and `/var/lib/pve-cluster/.` contains, among others:
+
+- `/etc/shadow` — password hashes of the node's local users;
+- the node's SSH host keys, and root's keys if you save `/root/.ssh`;
+- `/etc/pve/priv/` and the same data inside `config.db`: API token secrets, TFA configuration, storage
+  passwords, the private key of the cluster's certificate authority;
+- the node's TLS certificate and its private key.
+
+Whoever reads the archives can impersonate your nodes and read your storage credentials. Treat them
+as you treat root access:
+
+- keep `--directory-work` readable only by the account that runs the backups (`chmod 700` on Linux).
+  The tool creates the archives with the default permissions of that system and folder, it does not
+  restrict them itself;
+- if you copy the archives elsewhere, encrypt them;
+- delete them when they are no longer needed — `--keep` does this for the folders it manages.
+
+## Other outbound connections
+
+At most once every 24 hours the tool asks `api.github.com` for the latest release, to print a notice
+when a newer version exists. The result is cached in `~/.cv4pve/update-check.json`. The notice is not
+printed when the output is redirected, as in a scheduled job.

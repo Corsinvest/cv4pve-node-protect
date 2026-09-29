@@ -1,0 +1,70 @@
+---
+title: Scheduling
+description: Run cv4pve-node-protect every day with cron on Linux or Task Scheduler on Windows, and notice when a run fails.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+A configuration backup is useful only if it is recent: schedule it on the machine that keeps the
+archives. Put the connection in an [options file](../connection/#options-in-a-file), so the
+schedule stays short and the password or key path is not in the task definition.
+
+```text title="/etc/cv4pve/nodes.rsp (chmod 600)"
+--host=pve01,pve02,pve03
+--username=root
+--private-key-file=/root/.ssh/node-protect
+```
+
+<Tabs>
+  <TabItem label="Linux (cron)">
+
+Use the full path of the binary (`command -v cv4pve-node-protect` shows it) and create the folders
+first. One folder per schedule keeps daily, weekly and monthly copies apart, each with its own
+`--keep`:
+
+```bash
+# /etc/cron.d/cv4pve-node-protect
+PATHS=/etc/.;/etc/pve/.;/var/lib/pve-cluster/.;/var/spool/cron/crontabs;/root/.ssh
+
+# every day at 03:00, one week
+0 3 * * * root /usr/local/bin/cv4pve-node-protect @/etc/cv4pve/nodes.rsp backup --paths="$PATHS" --directory-work=/srv/node-protect/daily --keep=7 >> /var/log/cv4pve-node-protect.log 2>&1 || logger -t cv4pve-node-protect "backup failed"
+
+# every Sunday at 04:00, four weeks
+0 4 * * 0 root /usr/local/bin/cv4pve-node-protect @/etc/cv4pve/nodes.rsp backup --paths="$PATHS" --directory-work=/srv/node-protect/weekly --keep=4 >> /var/log/cv4pve-node-protect.log 2>&1 || logger -t cv4pve-node-protect "backup failed"
+
+# the 1st of the month at 05:00, one year
+0 5 1 * * root /usr/local/bin/cv4pve-node-protect @/etc/cv4pve/nodes.rsp backup --paths="$PATHS" --directory-work=/srv/node-protect/monthly --keep=12 >> /var/log/cv4pve-node-protect.log 2>&1 || logger -t cv4pve-node-protect "backup failed"
+```
+
+Assigning `PATHS` on its own line is a feature of cron's `/etc/cron.d` files. A cron line must fit on
+one line.
+
+  </TabItem>
+  <TabItem label="Windows (Task Scheduler)">
+
+In PowerShell, as administrator:
+
+```powershell
+$exe = (Get-Command cv4pve-node-protect).Source
+$arguments = '@C:\cv4pve\nodes.rsp backup --paths="/etc/.;/etc/pve/.;/var/lib/pve-cluster/." ' +
+             '--directory-work=D:\node-protect\daily --keep=7'
+
+$action  = New-ScheduledTaskAction -Execute $exe -Argument $arguments
+$trigger = New-ScheduledTaskTrigger -Daily -At 3am
+Register-ScheduledTask -TaskName 'cv4pve-node-protect daily' -Action $action -Trigger $trigger `
+  -User 'NT AUTHORITY\SYSTEM'
+```
+
+The task runs as `SYSTEM`, also when nobody is logged on: the options file and the key must be
+readable by it, and `D:\node-protect` should not be readable by other users. Task Scheduler shows the
+exit code of each run as *Last Run Result*: `0x1` means the run failed.
+
+  </TabItem>
+</Tabs>
+
+## Notice failures
+
+A run that fails exits with code **1** and leaves its dated folder behind; after a few failed runs
+in a row, [retention can delete good backups](../archive/#when-a-run-fails). Watch the exit code —
+the `|| logger` above writes a line to the system log, your monitoring can do better — and look at the
+size of the archives from time to time: a path that disappeared does not make the run fail.

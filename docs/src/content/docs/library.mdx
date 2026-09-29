@@ -1,0 +1,79 @@
+---
+title: .NET library
+description: Use the cv4pve-node-protect backup engine in your own .NET application with the Corsinvest.ProxmoxVE.NodeProtect.Api package.
+---
+
+The engine behind the command line is published on NuGet as
+[Corsinvest.ProxmoxVE.NodeProtect.Api](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.NodeProtect.Api/),
+for .NET 8, 9 and 10. [cv4pve-admin](https://corsinvest.github.io/cv4pve-admin/modules/node-protect/)
+uses the same package.
+
+```bash
+dotnet add package Corsinvest.ProxmoxVE.NodeProtect.Api
+```
+
+## What it does, and what it leaves to you
+
+The library backs up **one node at a time**: it connects with the SSH.NET `ConnectionInfo` you pass,
+runs the same `tar` command as the tool ([What happens on each node](../connection/#what-happens-on-each-node))
+and writes the archive to a file or a stream.
+
+Everything else is the caller's: the list of nodes, the dated folders, retention, and what to do when
+one node fails.
+
+## Example
+
+```csharp
+using Corsinvest.ProxmoxVE.NodeProtect.Api;
+using Microsoft.Extensions.Logging;
+using Renci.SshNet;
+
+using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+var engine = new ProtectEngine(loggerFactory.CreateLogger<ProtectEngine>());
+
+var key = new PrivateKeyFile("/root/.ssh/node-protect");
+var connection = new ConnectionInfo("pve01", 22, "root", new PrivateKeyAuthenticationMethod("root", key))
+{
+    Timeout = TimeSpan.FromSeconds(30)
+};
+
+var folder = Path.Combine("/srv/node-protect", DateTime.Now.ToString(ProtectEngine.DateFormat));
+Directory.CreateDirectory(folder);
+
+string[] paths = ["/etc/.", "/etc/pve/.", "/var/lib/pve-cluster/."];
+var summary = await engine.BackupNodeAsync("pve01",
+                                           connection,
+                                           paths,
+                                           Path.Combine(folder, "pve01" + ProtectEngine.FileNameSuffix));
+Console.WriteLine(summary); // [pve01] tar.gz streamed in 1.23 sec
+
+// Or into any stream: memory, upload, encryption…
+await using var stream = new MemoryStream();
+await engine.BackupNodeToStreamAsync("pve01", connection, paths, stream);
+```
+
+## API
+
+`ProtectEngine(ILogger<ProtectEngine> logger)` — logs at `Debug` level the command run on the node and
+the time taken.
+
+| Member | Description |
+|---|---|
+| `BackupNodeAsync(node, connectionInfo, paths, targetFilePath, cancellationToken)` | Creates `targetFilePath` (its folder must exist) and writes the archive into it. On any error the partial file is deleted and the exception is thrown again. |
+| `BackupNodeToStreamAsync(node, connectionInfo, paths, destination, cancellationToken)` | Writes the archive into `destination`, which is not disposed. Nothing is written to disk. |
+| `FileNameSuffix` | `"-config.tar.gz"`, the suffix the tool uses for archive names. |
+| `DateFormat` | `"yyyy-MM-dd-HH-mm-ss"`, the format of the tool's dated folders. |
+
+`node` is used only in logs and messages. Both methods return a short summary like
+`[pve01] tar.gz streamed in 1.23 sec`.
+
+Exceptions:
+
+- `InvalidOperationException` when `tar` on the node exits with code 2 or more; the message contains
+  its error output. Exit code 1 (a file changed while read) is accepted.
+- `ArgumentException` when a path contains a single quote.
+- The SSH.NET exceptions for connection and authentication errors.
+
+The same cautions as the tool apply: paths that do not exist or cannot be read are skipped without an
+error, and the host key is not checked — the `SshClient` is created inside the engine, so the caller
+cannot add a check. See [SSH access and security](../ssh-access/).

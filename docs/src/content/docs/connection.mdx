@@ -1,0 +1,84 @@
+---
+title: Connection
+description: How cv4pve-node-protect connects to the Proxmox VE nodes over SSH, and how to keep the options in a file for scheduled runs.
+---
+
+import CliResponseFiles from '@corsinvest/cv4pve-docs-theme/components/CliResponseFiles.astro';
+
+cv4pve-node-protect connects to **every node** over SSH, not to the Proxmox VE API. Set up the account
+first — see [SSH access and security](/cv4pve-node-protect/ssh-access/).
+
+## What happens on each node
+
+For every host in `--host`, one after the other, the tool:
+
+1. opens an SSH connection (port 22, or the one given as `host:port`);
+2. runs **one** command, with the paths from `--paths` in single quotes:
+
+   ```bash
+   tar --one-file-system --ignore-failed-read -czPf - '/etc/.' '/etc/pve/.' '/var/lib/pve-cluster/.'
+   ```
+
+3. writes what `tar` sends on the SSH channel straight into the local archive, and closes the connection.
+
+Nothing is installed and no file is written on the node — not even in `/tmp`. The command only reads.
+With [`--debug`](/cv4pve-node-protect/troubleshooting/) the tool prints the exact command it runs.
+
+## Options
+
+| Option | What it does |
+|---|---|
+| `--host` | The nodes to back up, comma-separated, each `host[:port]`; the port defaults to 22. Every node in the list is backed up — it is not a list of alternatives as in the API-based cv4pve tools. |
+| `--username` | SSH user. Always needed, with a key too. Use `root` — see [Which account](/cv4pve-node-protect/ssh-access/#which-account). |
+| `--private-key-file` | SSH private key; the file must exist. When given, only the key is tried, not the password. |
+| `--passphrase` | Passphrase of the key, if it has one. |
+| `--password` | SSH password, or `file:/path` to read it from a file (whole file, leading and trailing spaces and new lines removed). |
+| `--timeout` | SSH connection timeout in seconds. Default 30. |
+
+On error the tool prints `ERROR: …` and exits with code 1.
+
+### Hosts
+
+```bash
+--host=pve01                        # host name, port 22
+--host=pve01:2222                   # custom port
+--host=192.168.1.10,192.168.1.11    # several nodes, IPv4
+--host=fe80::1                      # IPv6 without port
+--host=[fe80::1]:2222               # IPv6 with port: brackets required
+--host=[::1]:22,pve01,192.168.1.10  # mixed
+```
+
+The nodes are backed up in the order given. The archive takes its name from the host **as you wrote
+it**: `--host=192.168.1.10` gives `192.168.1.10-config.tar.gz`, so use node names if you want archives
+named after the nodes. If one node fails, the run stops there — see
+[When a run fails](/cv4pve-node-protect/archive/#when-a-run-fails).
+
+:::note[IPv6 on Windows]
+An IPv6 address becomes part of the file name, and Windows does not allow `:` in file names: on
+Windows the run fails with a file name error. Use a host name that resolves to the IPv6 address.
+:::
+
+## Options in a file
+
+A backup run by cron or Task Scheduler repeats the same connection every time: keep it in a file. It is
+also the place for a password, instead of the command line.
+
+<CliResponseFiles
+  tool="cv4pve-node-protect"
+  file="nodes.rsp"
+  run="backup --paths='/etc/.;/etc/pve/.;/var/lib/pve-cluster/.' --directory-work=/srv/node-protect --keep=7"
+  lines={[
+    '# Every node to back up: each one gets its own archive',
+    '--host=pve01,pve02,pve03',
+    '--username=root',
+    '',
+    '# SSH key (recommended)',
+    '--private-key-file=/root/.ssh/id_ed25519',
+    '# --passphrase=<passphrase>',
+    '',
+    '# ...or a password: used only when no key is given',
+    '# --password=<password>',
+    '# ...or the password in a file',
+    '# --password=file:/etc/cv4pve/password',
+  ]}
+/>
