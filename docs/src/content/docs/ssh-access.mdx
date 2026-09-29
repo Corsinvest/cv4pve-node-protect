@@ -40,7 +40,7 @@ With [`--debug`](../troubleshooting/) the tool prints the exact command it runs.
 - `file:` reads the whole file and removes leading and trailing spaces and new lines.
 - A password or passphrase on the command line is visible to other users of the machine in the process
   list and stays in the shell history. Prefer a key; otherwise use `file:` or a
-  [response file](#response-files), readable only by you.
+  [options file](#options-in-a-file), readable only by you.
 
 Use a key made for this purpose, not your personal one. In the node's `/root/.ssh/authorized_keys`,
 OpenSSH's `from="…"` option limits it to the address of the machine that runs the backups:
@@ -49,7 +49,7 @@ OpenSSH's `from="…"` option limits it to the address of the machine that runs 
 from="192.168.1.50" ssh-ed25519 AAAA… node-protect
 ```
 
-## Response files
+## Options in a file
 
 <CliResponseFiles
   tool="cv4pve-node-protect"

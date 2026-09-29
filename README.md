@@ -70,7 +70,7 @@ mkdir -p /srv/node-protect && chmod 700 /srv/node-protect
 | | |
 |---|---|
 | [Getting started](https://corsinvest.github.io/cv4pve-node-protect/getting-started/) | Install, first backup, hosts |
-| [SSH access and security](https://corsinvest.github.io/cv4pve-node-protect/ssh-access/) | Authentication, response files, the account it needs, host keys, protecting the archives |
+| [SSH access and security](https://corsinvest.github.io/cv4pve-node-protect/ssh-access/) | Authentication, options in a file, the account it needs, host keys, protecting the archives |
 | [What to back up](https://corsinvest.github.io/cv4pve-node-protect/what-to-back-up/) | Recommended paths, `/etc/pve` and the cluster database |
 | [Archives and retention](https://corsinvest.github.io/cv4pve-node-protect/archive/) | Layout, format, `--keep`, what happens when a run fails |
 | [Scheduling](https://corsinvest.github.io/cv4pve-node-protect/scheduling/) | cron and Task Scheduler |
