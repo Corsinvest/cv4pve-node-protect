@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NuGet package description
 - Project metadata, symbols (Source Link, `.snupkg`) and code style aligned with the other cv4pve tools
 
+### Fixed
+- `--debug` and `--log-level` now show the backup engine's log: the `tar` command run on each node and how long the transfer took. Before, they only added the stack trace to errors
+
 ## [2.1.1] - 2026-04-20
 
 ### Changed
