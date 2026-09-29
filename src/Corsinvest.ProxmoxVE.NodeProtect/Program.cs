@@ -96,19 +96,42 @@ Directory Work: {directoryWork}
 Directory Node to archive:");
             foreach (var p in paths) { @out.WriteLine(p); }
 
-            // Create timestamped directory for this run
+            // Parse every host before creating anything, so a typo does not leave an empty dated folder
+            var hosts = hostsAndPort.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                    .Select(ParseHostAndPort)
+                                    .ToList();
+
+            // Create timestamped directory for this run (owner only on Unix: archives contain secrets)
             var pathSave = Path.Combine(directoryWork, DateTime.Now.ToString(ProtectEngine.DateFormat));
-            Directory.CreateDirectory(pathSave);
+            if (OperatingSystem.IsWindows()) { Directory.CreateDirectory(pathSave); }
+            else { Directory.CreateDirectory(pathSave, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
 
-            // Backup each host
-            foreach (var hostAndPort in hostsAndPort.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            // Backup each host: a failing node does not stop the others
+            var failed = new List<string>();
+            foreach (var (host, port) in hosts)
             {
-                var (host, port) = ParseHostAndPort(hostAndPort);
-                var targetFile = Path.Combine(pathSave, $"{host}{ProtectEngine.FileNameSuffix}");
-                var connectionInfo = BuildConnectionInfo(host, port, username!, password, passphrase, privateKeyFile, timeout);
+                var targetFile = Path.Combine(pathSave, $"{ToFileName(host)}{ProtectEngine.FileNameSuffix}");
+                try
+                {
+                    var connectionInfo = BuildConnectionInfo(host, port, username!, password, passphrase, privateKeyFile, timeout);
+                    await engine.BackupNodeAsync(host, connectionInfo, paths, targetFile);
+                    @out.WriteLine($"Create config: {Path.GetRelativePath(directoryWork, targetFile)}");
+                }
+                catch (Exception ex)
+                {
+                    failed.Add(host);
+                    @out.WriteLine($"ERROR [{host}]: {ex.Message}");
+                    loggerFactory.CreateLogger<Program>().LogDebug(ex, "Backup failed for {Host}", host);
+                }
+            }
 
-                await engine.BackupNodeAsync(host, connectionInfo, paths, targetFile);
-                @out.WriteLine($"Create config: {Path.GetRelativePath(directoryWork, targetFile)}");
+            if (failed.Count > 0)
+            {
+                // An empty folder would count as a backup for --keep on the next runs
+                if (!Directory.EnumerateFileSystemEntries(pathSave).Any()) { Directory.Delete(pathSave); }
+
+                // Retention skipped: it must not delete good backups to make room for an incomplete one
+                throw new InvalidOperationException($"Backup failed for {failed.Count} of {hosts.Count} node(s): {string.Join(", ", failed)}. Retention not applied.");
             }
 
             // Retention: keep only the latest N timestamped directories
@@ -121,6 +144,10 @@ Directory Node to archive:");
                 Directory.Delete(item, true);
             }
         }
+
+        // IPv6 addresses contain ':', not allowed in Windows file names
+        static string ToFileName(string host)
+            => string.Concat(host.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
 
         static string? ResolvePassword(string? password)
         {
@@ -137,12 +164,12 @@ Directory Node to archive:");
 
         static void ValidateAuth(string? username, string? password, string? privateKeyFile)
         {
-            if (string.IsNullOrEmpty(privateKeyFile) && string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(username))
             {
-                throw new InvalidOperationException("Option '--username' or '--private-key-file' is required!");
+                throw new InvalidOperationException("Option '--username' is required!");
             }
 
-            if (!string.IsNullOrEmpty(username) && string.IsNullOrEmpty(privateKeyFile) && string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(privateKeyFile) && string.IsNullOrEmpty(password))
             {
                 throw new InvalidOperationException("Option '--password' is required when using '--username' without a private key!");
             }

@@ -13,9 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Product icon (Lucide `shield-check`) and Windows executable icon
 - NuGet package description
 - Project metadata, symbols (Source Link, `.snupkg`) and code style aligned with the other cv4pve tools
+- **A node that fails no longer stops the run** — the other nodes are still backed up, each failure is printed as `ERROR [node]: …`, and the run ends with exit code 1. Retention is skipped when a node failed, so good backups are never deleted to make room for an incomplete one
+- **Skipped paths are reported** — a path that does not exist or cannot be read is still left out, but `tar`'s message is now printed as a warning instead of being discarded
+- **Archives readable only by their owner on Linux and macOS** — the dated folder is created with mode `700` and the archives with `600`, since they contain password hashes, keys and the cluster database
+- `--username` is now always required, also with `--private-key-file`: the error is shown before anything is created
 
 ### Fixed
 - `--debug` and `--log-level` now show the backup engine's log: the `tar` command run on each node and how long the transfer took. Before, they only added the stack trace to errors
+- A failed run no longer leaves an empty dated folder, which counted as a backup for `--keep`
+- IPv6 hosts on Windows: the `:` of the address is replaced by `_` in the archive name, since Windows does not allow it in file names. Before, the run failed
 
 ## [2.1.1] - 2026-04-20
 
