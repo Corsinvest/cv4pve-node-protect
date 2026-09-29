@@ -4,17 +4,13 @@
  */
 
 using System.CommandLine;
-using System.Text.RegularExpressions;
 using Corsinvest.ProxmoxVE.Api.Console.Helpers;
 using Corsinvest.ProxmoxVE.NodeProtect.Api;
 using Microsoft.Extensions.Logging;
 using Renci.SshNet;
 
-internal partial class Program
+internal class Program
 {
-    [GeneratedRegex(@"^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}$")]
-    private static partial Regex DateFolderRegex();
-
     private static async Task<int> Main(string[] args)
     {
         var app = new RootCommand("Node protect for Proxmox VE");
@@ -97,9 +93,7 @@ Directory Node to archive:");
             foreach (var p in paths) { @out.WriteLine(p); }
 
             // Parse every host before creating anything, so a typo does not leave an empty dated folder
-            var hosts = hostsAndPort.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                                    .Select(ParseHostAndPort)
-                                    .ToList();
+            var hosts = ProtectHelper.ParseHosts(hostsAndPort);
 
             // Create timestamped directory for this run (owner only on Unix: archives contain secrets)
             var pathSave = Path.Combine(directoryWork, DateTime.Now.ToString(ProtectEngine.DateFormat));
@@ -110,7 +104,7 @@ Directory Node to archive:");
             var failed = new List<string>();
             foreach (var (host, port) in hosts)
             {
-                var targetFile = Path.Combine(pathSave, $"{ToFileName(host)}{ProtectEngine.FileNameSuffix}");
+                var targetFile = Path.Combine(pathSave, ProtectHelper.GetArchiveFileName(host));
                 try
                 {
                     var connectionInfo = BuildConnectionInfo(host, port, username!, password, passphrase, privateKeyFile, timeout);
@@ -135,19 +129,12 @@ Directory Node to archive:");
             }
 
             // Retention: keep only the latest N timestamped directories
-            foreach (var item in Directory.GetDirectories(directoryWork)
-                                          .Where(d => DateFolderRegex().IsMatch(Path.GetFileName(d)))
-                                          .OrderByDescending(a => a)
-                                          .Skip(keep))
+            foreach (var item in ProtectHelper.GetBackupsToDelete(Directory.GetDirectories(directoryWork), keep))
             {
                 @out.WriteLine($"Delete Backup: {Path.GetFileName(item)}");
                 Directory.Delete(item, true);
             }
         }
-
-        // IPv6 addresses contain ':', not allowed in Windows file names
-        static string ToFileName(string host)
-            => string.Concat(host.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
 
         static string? ResolvePassword(string? password)
         {
@@ -173,36 +160,6 @@ Directory Node to archive:");
             {
                 throw new InvalidOperationException("Option '--password' is required when using '--username' without a private key!");
             }
-        }
-
-        static (string Host, int Port) ParseHostAndPort(string hostAndPort)
-        {
-            const int DefaultPort = 22;
-
-            // IPv6 in brackets: [addr] or [addr]:port (canonical "host:port" notation for IPv6)
-            if (hostAndPort.StartsWith('['))
-            {
-                var closeBracket = hostAndPort.IndexOf(']');
-                if (closeBracket < 0) { throw new ArgumentException($"Invalid IPv6 format, missing ']': {hostAndPort}"); }
-
-                var hostV6 = hostAndPort[1..closeBracket];
-                var rest = hostAndPort[(closeBracket + 1)..];
-
-                if (rest.Length == 0) { return (hostV6, DefaultPort); }
-                if (!rest.StartsWith(':') || !int.TryParse(rest[1..], out var portV6))
-                {
-                    throw new ArgumentException($"Invalid port after ']' in: {hostAndPort}");
-                }
-                return (hostV6, portV6);
-            }
-
-            // IPv6 without brackets (e.g. "fe80::1"): more than one ':' → treat whole string as host, default port
-            if (hostAndPort.Count(c => c == ':') > 1) { return (hostAndPort, DefaultPort); }
-
-            // IPv4 or hostname, optionally with single ":port"
-            var parts = hostAndPort.Split(':');
-            var port = parts.Length == 2 && int.TryParse(parts[1], out var p) ? p : DefaultPort;
-            return (parts[0], port);
         }
 
         static ConnectionInfo BuildConnectionInfo(string host,
