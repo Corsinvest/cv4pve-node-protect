@@ -69,13 +69,13 @@ mkdir -p /srv/node-protect && chmod 700 /srv/node-protect
 
 | | |
 |---|---|
-| [Getting started](https://corsinvest.github.io/cv4pve-node-protect/getting-started/) | Install, first backup, hosts |
-| [SSH access and security](https://corsinvest.github.io/cv4pve-node-protect/ssh-access/) | Authentication, options in a file, the account it needs, host keys, protecting the archives |
+| [Getting started](https://corsinvest.github.io/cv4pve-node-protect/getting-started/) | Install, first backup, the options of `backup` |
+| [SSH access and security](https://corsinvest.github.io/cv4pve-node-protect/ssh-access/) | The account it needs, host keys, protecting the archives |
+| [Connection](https://corsinvest.github.io/cv4pve-node-protect/connection/) | What runs on each node, hosts and ports, authentication, options in a file |
 | [What to back up](https://corsinvest.github.io/cv4pve-node-protect/what-to-back-up/) | Recommended paths, `/etc/pve` and the cluster database |
 | [Archives and retention](https://corsinvest.github.io/cv4pve-node-protect/archive/) | Layout, format, `--keep`, what happens when a run fails |
 | [Scheduling](https://corsinvest.github.io/cv4pve-node-protect/scheduling/) | cron and Task Scheduler |
 | [Restore](https://corsinvest.github.io/cv4pve-node-protect/restore/) | A single file, a reinstalled node, a lost node |
-| [Options](https://corsinvest.github.io/cv4pve-node-protect/options/) | Every option, exit codes |
 | [.NET library](https://corsinvest.github.io/cv4pve-node-protect/library/) | The engine in your own application |
 | [Troubleshooting](https://corsinvest.github.io/cv4pve-node-protect/troubleshooting/) | Diagnostic options and common errors |
 

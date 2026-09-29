@@ -15,7 +15,7 @@ dotnet add package Corsinvest.ProxmoxVE.NodeProtect.Api
 ## What it does, and what it leaves to you
 
 The library backs up **one node at a time**: it connects with the SSH.NET `ConnectionInfo` you pass,
-runs the same `tar` command as the tool ([What happens on each node](../ssh-access/#what-happens-on-each-node))
+runs the same `tar` command as the tool ([What happens on each node](../connection/#what-happens-on-each-node))
 and writes the archive to a file or a stream.
 
 Everything else is the caller's: the list of nodes, the dated folders, retention, and what to do when

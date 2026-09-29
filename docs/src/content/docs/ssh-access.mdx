@@ -1,75 +1,12 @@
 ---
 title: SSH access and security
-description: How cv4pve-node-protect connects to Proxmox VE nodes over SSH, which account it needs, what it does not check, and how to protect the archives.
+description: The SSH account cv4pve-node-protect needs on the Proxmox VE nodes, what it does not check, and how to protect the archives.
 ---
 
-import CliResponseFiles from '@corsinvest/cv4pve-docs-theme/components/CliResponseFiles.astro';
-
-cv4pve-node-protect is the only cv4pve tool that does **not** use the Proxmox VE API: it copies files, such as `/etc/network/interfaces` or the cluster database, that the API does
-not hand out as files, so it reads them over SSH, as a shell user. That changes the security
-picture compared with an API token, and this page says how.
-
-## What happens on each node
-
-For every host in `--host`, one after the other, the tool:
-
-1. opens an SSH connection (port 22, or the one given as `host:port`);
-2. runs **one** command, with the paths from `--paths` in single quotes:
-
-   ```bash
-   tar --one-file-system --ignore-failed-read -czPf - '/etc/.' '/etc/pve/.' '/var/lib/pve-cluster/.'
-   ```
-
-3. writes what `tar` sends on the SSH channel straight into the local archive, and closes the connection.
-
-Nothing is installed and no file is written on the node — not even in `/tmp`. The command only reads.
-With [`--debug`](../troubleshooting/) the tool prints the exact command it runs.
-
-## Authentication
-
-| Method | Options |
-|---|---|
-| SSH key | `--username=root --private-key-file=/path/to/key` |
-| SSH key with passphrase | `--username=root --private-key-file=/path/to/key --passphrase=SECRET` |
-| Password | `--username=root --password=SECRET` |
-| Password from a file | `--username=root --password=file:/path/to/secret` |
-
-- `--username` is always needed, with a key too.
-- With both a key and a password, **only the key is tried**: there is no fallback to the password.
-- `--private-key-file` must point to an existing file, checked before connecting.
-- `file:` reads the whole file and removes leading and trailing spaces and new lines.
-- A password or passphrase on the command line is visible to other users of the machine in the process
-  list and stays in the shell history. Prefer a key; otherwise use `file:` or a
-  [options file](#options-in-a-file), readable only by you.
-
-Use a key made for this purpose, not your personal one. In the node's `/root/.ssh/authorized_keys`,
-OpenSSH's `from="…"` option limits it to the address of the machine that runs the backups:
-
-```text
-from="192.168.1.50" ssh-ed25519 AAAA… node-protect
-```
-
-## Options in a file
-
-<CliResponseFiles
-  tool="cv4pve-node-protect"
-  file="nodes.rsp"
-  run="backup --paths='/etc/.;/etc/pve/.;/var/lib/pve-cluster/.' --directory-work=/srv/node-protect --keep=7"
-  lines={[
-    '# Every node to back up: each one gets its own archive',
-    '--host=pve01,pve02,pve03',
-    '--username=root',
-    '',
-    '# SSH key (recommended)',
-    '--private-key-file=/root/.ssh/id_ed25519',
-    '# --passphrase=<passphrase>',
-    '',
-    '# ...or a password: used only when no key is given',
-    '# --password=<password>',
-    '# ...or the password in a file',
-    '# --password=file:/etc/cv4pve/password',
-  ]}
-/>
+cv4pve-node-protect is the only cv4pve tool that does **not** use the Proxmox VE API: it copies files,
+such as `/etc/network/interfaces` or the cluster database, that the API does not hand out as files, so
+it reads them over SSH, as a shell user. That changes the security picture compared with an API token:
+this page says which account it needs, what it does not check and how to protect the archives.
 
 ## Which account
 
@@ -80,6 +17,20 @@ With another user the backup does not fail: `tar` runs with `--ignore-failed-rea
 user cannot read is **left out in silence** and the run ends with exit code 0. The archive looks fine
 and is incomplete. The tool runs `tar` directly and does not use `sudo`, so giving the user sudo rights
 changes nothing.
+
+## Authentication
+
+Prefer an **SSH key**: a password or passphrase on the command line is visible to other users of the
+machine in the process list and stays in the shell history. If you use a password, pass it with
+`--password=file:/path` or in an [options file](/cv4pve-node-protect/connection/#options-in-a-file),
+readable only by you. The options are in [Connection](/cv4pve-node-protect/connection/#options).
+
+Use a key made for this purpose, not your personal one. In the node's `/root/.ssh/authorized_keys`,
+OpenSSH's `from="…"` option limits it to the address of the machine that runs the backups:
+
+```text
+from="192.168.1.50" ssh-ed25519 AAAA… node-protect
+```
 
 ## Host key: not verified
 
