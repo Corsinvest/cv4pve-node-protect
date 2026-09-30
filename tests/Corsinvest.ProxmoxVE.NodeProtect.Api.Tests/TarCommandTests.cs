@@ -9,7 +9,7 @@ public class TarCommandTests
 {
     [Fact]
     public void BuildTarCommand_QuotesEveryPath()
-        => Assert.Equal("tar --one-file-system --ignore-failed-read -czPf - '/etc/.' '/etc/pve/.' '/root/my scripts'",
+        => Assert.Equal("tar --one-file-system --ignore-failed-read -czPf - -- '/etc/.' '/etc/pve/.' '/root/my scripts'",
                         ProtectEngine.BuildTarCommand(["/etc/.", "/etc/pve/.", "/root/my scripts"]));
 
     [Theory]
@@ -18,6 +18,12 @@ public class TarCommandTests
     [InlineData("/etc/`id`")]
     public void BuildTarCommand_ShellCharactersStayInsideQuotes(string path)
         => Assert.EndsWith($" '{path}'", ProtectEngine.BuildTarCommand([path]));
+
+    [Theory]
+    [InlineData("--checkpoint-action=exec=id")]
+    [InlineData("-C")]
+    public void BuildTarCommand_PathStartingWithDash_IsNotAnOption(string path)
+        => Assert.EndsWith($" -- '{path}'", ProtectEngine.BuildTarCommand([path]));
 
     [Fact]
     public void BuildTarCommand_SingleQuote_Throws()

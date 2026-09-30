@@ -16,7 +16,7 @@ For every host in `--host`, one after the other, the tool:
 2. runs **one** command, with the paths from `--paths` in single quotes:
 
    ```bash
-   tar --one-file-system --ignore-failed-read -czPf - '/etc/.' '/etc/pve/.' '/var/lib/pve-cluster/.'
+   tar --one-file-system --ignore-failed-read -czPf - -- '/etc/.' '/etc/pve/.' '/var/lib/pve-cluster/.'
    ```
 
 3. writes what `tar` sends on the SSH channel straight into the local archive, and closes the connection.
