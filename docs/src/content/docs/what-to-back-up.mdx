@@ -59,6 +59,7 @@ second source if one day it does not.
 - Use absolute paths. The archive stores them as written: with `/etc/.` the entries are named
   `/etc/./network/interfaces`, with `/etc` they are `/etc/network/interfaces`. You need the exact name
   to extract a single file — list the archive first.
-- A path that does not exist on the node is skipped in silence, so the same list works on nodes with
-  and without, say, `/root/scripts`. It also means a typo is not reported.
+- A path that does not exist on the node is left out with a warning and the run goes on, so the same
+  list works on nodes with and without, say, `/root/scripts`. A typo gives the same warning, not an
+  error: read the warnings.
 - A path cannot contain a single quote `'`.

@@ -22,7 +22,8 @@ machine running the tool, with one archive per node:
 
 - The folder name is `yyyy-MM-dd-HH-mm-ss`, so sorting by name is sorting by date.
 - The archive name is the host **as written in `--host`**, without the port, followed by
-  `-config.tar.gz`. On Windows an IPv6 address cannot be part of a file name: use a host name there.
+  `-config.tar.gz`. On Windows, which does not allow `:` in file names, the `:` of an IPv6 address
+  becomes `_`: `fe80::1` gives `fe80__1-config.tar.gz`.
 - `--directory-work` must exist; the tool creates only the dated folders inside it.
 
 ## Format
@@ -51,19 +52,18 @@ To keep daily, weekly and monthly copies, use one `--directory-work` per schedul
 
 ## When a run fails
 
-The nodes are backed up one after the other. The first error — a node that does not answer, a refused
-login, a `tar` failure — **stops the whole run**, with exit code 1:
+The nodes are backed up one after the other. An error on one node — it does not answer, the login is
+refused, `tar` fails — does not stop the others:
 
-- the nodes after the failing one are **not** backed up;
+- the error is printed as `ERROR [node]: …` and the run goes on with the next node;
 - the half-written archive of the failing node is deleted;
-- retention does **not** run;
-- the dated folder of that run stays, with the archives of the nodes done before the error, or empty.
+- at the end the tool prints `ERROR: Backup failed for N of M node(s): … Retention not applied.` and
+  exits with code 1;
+- retention does **not** run, so an incomplete run never makes room by deleting good backups;
+- the dated folder keeps the archives of the nodes that succeeded; if every node failed, it is removed.
 
-That folder has a date name, so the next runs count it as one of the `--keep` folders. After several
-failed runs in a row, good backups can be deleted to make room for empty folders. Check the exit
-code of scheduled runs, and remove empty or incomplete folders after a failure.
-
-While a node is down for maintenance, take it out of `--host`, or put it last.
+While a node is down, every run fails for that node and retention never runs, so dated folders pile up
+in `--directory-work`. Take the node out of `--host` for as long as it is down.
 
 A `tar` that ends with exit code 1 — some file changed while it was read, common on a running system —
-is **not** an error: the archive is kept.
+is **not** an error: the archive is kept and `tar`'s message is printed as a warning.

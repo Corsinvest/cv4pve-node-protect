@@ -57,10 +57,11 @@ Each run creates a folder named after the local date and time, with one archive 
 eighth run on, `--keep=7` deletes the oldest folder and prints `Delete Backup: <folder>`. The tool
 exits with code 0 when every node is backed up, 1 on an error.
 
-:::caution[A missing file is not an error]
-Paths that do not exist on the node, and files the SSH user cannot read, are skipped **without any
-message** and the run still ends with exit code 0. A typo in `--paths` gives an archive of a few dozen
-bytes. Look inside the archive once, and after every change of `--paths` or of the SSH user:
+:::caution[A missing file is only a warning]
+Paths that do not exist on the node, and files the SSH user cannot read, are left out of the archive:
+`tar`'s message is printed as a warning and the run still ends with exit code 0. A typo in `--paths`
+gives an archive of a few dozen bytes. Read the warnings of the first run, and look inside the archive
+once, and after every change of `--paths` or of the SSH user:
 
 ```bash
 tar -tzvf /srv/node-protect/2026-09-29-03-00-01/pve01-config.tar.gz | less

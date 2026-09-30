@@ -14,8 +14,8 @@ this page says which account it needs, what it does not check and how to protect
 (mode `0600`), `/etc/shadow`, the SSH host keys, `/etc/pve/priv/`.
 
 With another user the backup does not fail: `tar` runs with `--ignore-failed-read`, so every file the
-user cannot read is **left out in silence** and the run ends with exit code 0. The archive looks fine
-and is incomplete. The tool runs `tar` directly and does not use `sudo`, so giving the user sudo rights
+user cannot read is **left out**, with a warning such as `tar: /etc/shadow: Cannot open: Permission
+denied`, and the run ends with exit code 0. The archive is incomplete. The tool runs `tar` directly and does not use `sudo`, so giving the user sudo rights
 changes nothing.
 
 ## Authentication
@@ -59,9 +59,9 @@ A backup of `/etc/.`, `/etc/pve/.` and `/var/lib/pve-cluster/.` contains, among 
 Whoever reads the archives can impersonate your nodes and read your storage credentials. Treat them
 as you treat root access:
 
-- keep `--directory-work` readable only by the account that runs the backups (`chmod 700` on Linux).
-  The tool creates the archives with the default permissions of that system and folder, it does not
-  restrict them itself;
+- on Linux and macOS the tool creates each dated folder with mode `700` and each archive with mode
+  `600`: only the account that runs the backups can read them. On Windows they take the permissions of
+  `--directory-work`, so restrict that folder to the account that runs the backups;
 - if you copy the archives elsewhere, encrypt them;
 - delete them when they are no longer needed — `--keep` does this for the folders it manages.
 
