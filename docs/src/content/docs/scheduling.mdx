@@ -64,7 +64,7 @@ exit code of each run as *Last Run Result*: `0x1` means the run failed.
 
 ## Notice failures
 
-A run that fails exits with code **1** and leaves its dated folder behind; after a few failed runs
-in a row, [retention can delete good backups](../archive/#when-a-run-fails). Watch the exit code —
-the `|| logger` above writes a line to the system log, your monitoring can do better — and look at the
-size of the archives from time to time: a path that disappeared does not make the run fail.
+A run where a node fails exits with code **1** and applies no retention: while a node stays down,
+dated folders pile up — see [When a run fails](../archive/#when-a-run-fails). Watch the exit code —
+the `|| logger` above writes a line to the system log, your monitoring can do better — and the warnings
+in the log: a path that disappeared does not make the run fail.

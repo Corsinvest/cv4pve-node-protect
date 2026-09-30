@@ -9,26 +9,42 @@ import CliTroubleshooting from '@corsinvest/cv4pve-docs-theme/components/CliTrou
 
 ## Common errors
 
-Errors end the run with exit code 1. Errors in the options are printed with the help of the command;
-the others as `ERROR: <message>`.
+Every error ends the run with exit code 1. Errors in the options are printed with the help of the
+command, the others as `ERROR: <message>` before anything is backed up.
 
-| Message | Cause |
-|---|---|
-| `Connection has timed out.` | The node did not answer within `--timeout` seconds (30 by default): wrong address or port, node down, firewall. |
-| `Permission denied (password).` / `Permission denied (publickey).` | The node refused the user and the password, or the key. |
-| `Username is required!` | `--private-key-file` without `--username`. |
-| `Option '--password' is required when using '--username' without a private key!` | Neither a password nor a key was given. |
-| `Option … whit value '…' is not a valid file!` | The folder in `--directory-work` does not exist (the message says "file" for folders too). Create it first. |
-| `Password file not found: …` | The file after `--password=file:` does not exist. |
-| `Path must not contain single quotes: …` | A path in `--paths` contains `'`, which the tool does not accept. |
-| `[node] tar failed (exit 2): …` | `tar` on the node failed; its own error message follows. |
+An error on one node is printed as `ERROR [node]: <message>`, and the run goes on with the other nodes.
+At the end the tool prints the nodes that failed and applies no retention — see
+[When a run fails](../archive/#when-a-run-fails):
 
-When a run stops on an error, the nodes after the failing one are not backed up and retention is not
-applied — see [When a run fails](../archive/#when-a-run-fails).
+```text
+ERROR [pve02]: Connection has timed out.
+Create config: 2026-09-29-03-00-01/pve01-config.tar.gz
+ERROR: Backup failed for 1 of 2 node(s): pve02. Retention not applied.
+```
+
+| Message | Printed as | Cause |
+|---|---|---|
+| `Option '--username' is required!` | `ERROR:` | `--username` is missing; it is needed with a key too. |
+| `Option '--password' is required when using '--username' without a private key!` | `ERROR:` | Neither a password nor a key was given. |
+| `Option … whit value '…' is not a valid file!` | With the help | The folder in `--directory-work` does not exist (the message says "file" for folders too). Create it first. |
+| `Password file not found: …` | `ERROR:` | The file after `--password=file:` does not exist. |
+| `Invalid IPv6 format, missing ']': …` / `Invalid port after ']' in: …` | `ERROR:` | An entry of `--host` in brackets is not `[address]` or `[address]:port`. |
+| `Connection has timed out.` | `ERROR [node]:` | The node did not answer within `--timeout` seconds (30 by default): wrong address or port, node down, firewall. |
+| `Permission denied (password).` / `Permission denied (publickey).` | `ERROR [node]:` | The node refused the user and the password, or the key. |
+| `Path must not contain single quotes: … (Parameter 'value')` | `ERROR [node]:` | A path in `--paths` contains `'`, which the tool does not accept. Checked before connecting, so every node reports it. |
+| `[node] tar failed (exit N): …` | `ERROR [node]:` | `tar` on the node exited with code 2 or more; its own error message follows. |
 
 ## The archive is smaller than expected
 
-No message tells you that a path was skipped. List the archive and look for what you expected:
+Every path `tar` leaves out is printed as a warning, and the run still ends with exit code 0:
+
+```text
+warn: Corsinvest.ProxmoxVE.NodeProtect.Api.ProtectEngine[0]
+      [pve01] tar: /etc/doesnotexist: Warning: Cannot stat: No such file or directory
+```
+
+In a scheduled run, look for these lines in its log. To check an archive, list it and look for what you
+expected:
 
 ```bash
 tar -tzf pve01-config.tar.gz | grep -E 'config.db|network/interfaces'

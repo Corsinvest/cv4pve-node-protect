@@ -14,12 +14,13 @@ dotnet add package Corsinvest.ProxmoxVE.NodeProtect.Api
 
 ## What it does, and what it leaves to you
 
-The library backs up **one node at a time**: it connects with the SSH.NET `ConnectionInfo` you pass,
+`ProtectEngine` backs up **one node at a time**: it connects with the SSH.NET `ConnectionInfo` you pass,
 runs the same `tar` command as the tool ([What happens on each node](../connection/#what-happens-on-each-node))
 and writes the archive to a file or a stream.
 
-Everything else is the caller's: the list of nodes, the dated folders, retention, and what to do when
-one node fails.
+`ProtectHelper` gives the rest of the tool's layout — host parsing, archive names, which dated folders
+retention deletes — so your application can store backups the way the tool does. The loop over the
+nodes, the credentials and what to do when one node fails stay yours.
 
 ## Example
 
@@ -37,15 +38,22 @@ var connection = new ConnectionInfo("pve01", 22, "root", new PrivateKeyAuthentic
     Timeout = TimeSpan.FromSeconds(30)
 };
 
-var folder = Path.Combine("/srv/node-protect", DateTime.Now.ToString(ProtectEngine.DateFormat));
+var workDir = "/srv/node-protect";
+var folder = Path.Combine(workDir, DateTime.Now.ToString(ProtectEngine.DateFormat));
 Directory.CreateDirectory(folder);
 
 string[] paths = ["/etc/.", "/etc/pve/.", "/var/lib/pve-cluster/."];
 var summary = await engine.BackupNodeAsync("pve01",
                                            connection,
                                            paths,
-                                           Path.Combine(folder, "pve01" + ProtectEngine.FileNameSuffix));
+                                           Path.Combine(folder, ProtectHelper.GetArchiveFileName("pve01")));
 Console.WriteLine(summary); // [pve01] tar.gz streamed in 1.23 sec
+
+// Retention as --keep=7 does it: only dated folders are counted and deleted
+foreach (var old in ProtectHelper.GetBackupsToDelete(Directory.GetDirectories(workDir), 7))
+{
+    Directory.Delete(old, true);
+}
 
 // Or into any stream: memory, upload, encryption…
 await using var stream = new MemoryStream();
@@ -54,12 +62,15 @@ await engine.BackupNodeToStreamAsync("pve01", connection, paths, stream);
 
 ## API
 
+### ProtectEngine
+
 `ProtectEngine(ILogger<ProtectEngine> logger)` — logs at `Debug` level the command run on the node and
-the time taken.
+the time taken, and at `Warning` level every line `tar` writes to its error output: paths it left out,
+files that changed while read.
 
 | Member | Description |
 |---|---|
-| `BackupNodeAsync(node, connectionInfo, paths, targetFilePath, cancellationToken)` | Creates `targetFilePath` (its folder must exist) and writes the archive into it. On any error the partial file is deleted and the exception is thrown again. |
+| `BackupNodeAsync(node, connectionInfo, paths, targetFilePath, cancellationToken)` | Creates `targetFilePath` (its folder must exist) and writes the archive into it; on Linux and macOS the file gets mode `600`. On any error the partial file is deleted and the exception is thrown again. |
 | `BackupNodeToStreamAsync(node, connectionInfo, paths, destination, cancellationToken)` | Writes the archive into `destination`, which is not disposed. Nothing is written to disk. |
 | `FileNameSuffix` | `"-config.tar.gz"`, the suffix the tool uses for archive names. |
 | `DateFormat` | `"yyyy-MM-dd-HH-mm-ss"`, the format of the tool's dated folders. |
@@ -71,9 +82,20 @@ Exceptions:
 
 - `InvalidOperationException` when `tar` on the node exits with code 2 or more; the message contains
   its error output. Exit code 1 (a file changed while read) is accepted.
-- `ArgumentException` when a path contains a single quote.
+- `ArgumentException` when a path contains a single quote, before connecting to the node.
 - The SSH.NET exceptions for connection and authentication errors.
 
-The same cautions as the tool apply: paths that do not exist or cannot be read are skipped without an
-error, and the host key is not checked — the `SshClient` is created inside the engine, so the caller
-cannot add a check. See [SSH access and security](../ssh-access/).
+The same cautions as the tool apply: paths that do not exist or cannot be read are left out with a
+warning on the logger, not an exception, and the host key is not checked — the `SshClient` is created
+inside the engine, so the caller cannot add a check. See [SSH access and security](../ssh-access/).
+
+### ProtectHelper
+
+| Member | Description |
+|---|---|
+| `ParseHosts(hosts)` | Parses a comma-separated `--host` value into host and port pairs, in order; empty entries are skipped. |
+| `ParseHostAndPort(hostAndPort)` | Parses one `host[:port]`: host name, IPv4, IPv6 in brackets with or without port, bare IPv6 without port. Throws `ArgumentException` for a malformed bracketed entry. |
+| `DefaultPort` | `22`, the port used when an entry has none. |
+| `GetArchiveFileName(host)` | `<host>-config.tar.gz`, with the characters not allowed in file names on the current system replaced by `_` (the `:` of IPv6 on Windows). |
+| `IsBackupDirectoryName(name)` | Whether a folder name has the `DateFormat` shape, such as `2026-09-29-03-00-01`. |
+| `GetBackupsToDelete(directories, keep)` | The dated folders beyond the newest `keep`, as the tool deletes them. Folders with other names are never returned. |

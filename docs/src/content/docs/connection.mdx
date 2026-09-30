@@ -50,13 +50,11 @@ On error the tool prints `ERROR: …` and exits with code 1.
 
 The nodes are backed up in the order given. The archive takes its name from the host **as you wrote
 it**: `--host=192.168.1.10` gives `192.168.1.10-config.tar.gz`, so use node names if you want archives
-named after the nodes. If one node fails, the run stops there — see
-[When a run fails](/cv4pve-node-protect/archive/#when-a-run-fails).
+named after the nodes. On Windows, which does not allow `:` in file names, the `:` of an IPv6 address
+becomes `_`: `--host=fe80::1` gives `fe80__1-config.tar.gz`.
 
-:::note[IPv6 on Windows]
-An IPv6 address becomes part of the file name, and Windows does not allow `:` in file names: on
-Windows the run fails with a file name error. Use a host name that resolves to the IPv6 address.
-:::
+If one node fails, the others are still backed up and the run ends with exit code 1 — see
+[When a run fails](/cv4pve-node-protect/archive/#when-a-run-fails).
 
 ## Options in a file
 
