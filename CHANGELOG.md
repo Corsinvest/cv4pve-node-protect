@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - A path containing a single quote is rejected before connecting to the node
-- Updated Corsinvest.ProxmoxVE.Api.Extension and Api.Console to 9.2.3
+- Updated Corsinvest.ProxmoxVE.Api.Extension and Api.Console to 9.2.4
 - Updated SSH.NET to 2026.0.0 (fixes GHSA-mggc-4xg6-vcxf and GHSA-q939-rpr3-3284 in `ScpClient`, which node-protect does not use)
 - Product icon (Lucide `shield-check`) and Windows executable icon
 - NuGet package description
