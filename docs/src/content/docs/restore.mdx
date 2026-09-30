@@ -1,6 +1,6 @@
 ---
 title: Restore
-description: How to get a Proxmox VE node's configuration back from a cv4pve-node-protect archive — a single file, a reinstalled node in a cluster, or a lost node.
+description: How to get a Proxmox VE node's configuration back from a cv4pve-node-protect archive, for a single file, a reinstalled node in a cluster or a lost node.
 ---
 
 import { Steps } from '@astrojs/starlight/components';
@@ -25,7 +25,7 @@ Always extract into a staging folder, and copy back only the files you checked.
    `2026-09-29-03-00-01/pve01-config.tar.gz`. Make sure it is the node you want: the file name is the
    host as it was written in `--host`, and `/etc/hostname` inside tells you which node it came from.
 
-2. **Copy it to where you work** — the node itself, or any Linux machine to read it:
+2. **Copy it to where you work**: the node itself, or any Linux machine to read it:
 
    ```bash
    scp 2026-09-29-03-00-01/pve01-config.tar.gz root@pve01:/root/
@@ -65,7 +65,7 @@ Then pick the case below.
 
 ## A single node file
 
-A file under `/etc` changed by mistake — `network/interfaces`, `hosts`, a file in `modprobe.d`:
+A file under `/etc` changed by mistake (`network/interfaces`, `hosts`, a file in `modprobe.d`):
 copy it back from the staging folder and apply it as you would after editing it by hand. For the
 network, `ifreload -a` applies `/etc/network/interfaces` (or use *Apply Configuration* in the node's
 *Network* panel); for other files, restart the service that reads them, or reboot.
@@ -81,7 +81,7 @@ back.
 ## A file in /etc/pve
 
 `/etc/pve` is shared by all nodes of the cluster: a file written there on one node is on all of them.
-Use it to take back one definition — `storage.cfg`, a job, a firewall rule, the configuration of a
+Use it to take back one definition: `storage.cfg`, a job, a firewall rule, the configuration of a
 guest deleted by mistake.
 
 If you backed up `/etc/pve/.`, the file is in the staging folder:
@@ -92,7 +92,7 @@ diff -u /etc/pve/storage.cfg /root/restore/etc/pve/storage.cfg
 cp /root/restore/etc/pve/storage.cfg /etc/pve/storage.cfg
 ```
 
-Only with `/var/lib/pve-cluster/.` in the archive, read the file from the database — see
+Only with `/var/lib/pve-cluster/.` in the archive, read the file from the database: see
 [Read a file from config.db](#read-a-file-from-configdb).
 
 The cluster must have quorum for `/etc/pve` to be writable. A guest configuration goes back under
@@ -144,7 +144,7 @@ host, reboot. Follow it there; the steps below prepare the file.
 
 The archive holds `config.db` **with** `config.db-wal`, where the most recent changes are
 ([why](../what-to-back-up/#the-cluster-database-is-copied-while-in-use)). Merge them into
-`config.db` in the staging folder before using it — never on the live file:
+`config.db` in the staging folder before using it, never on the live file:
 
 ```bash
 tar -xzf pve01-config.tar.gz -C /root/restore /var/lib/pve-cluster/.
@@ -173,7 +173,7 @@ sqlite3 config.db "SELECT writefile('/root/restore/storage.cfg', data) FROM tree
 
 `writefile` writes the content byte for byte and prints its size.
 
-Names are not unique across folders — each node has its own `host.fw`, for instance. List the matches
+Names are not unique across folders: each node has its own `host.fw`, for instance. List the matches
 with their `inode` and `parent`, and follow `parent` up to the folder you want:
 
 ```bash

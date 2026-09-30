@@ -6,7 +6,7 @@ description: How cv4pve-node-protect connects to the Proxmox VE nodes over SSH, 
 import CliResponseFiles from '@corsinvest/cv4pve-docs-theme/components/CliResponseFiles.astro';
 
 cv4pve-node-protect connects to **every node** over SSH, not to the Proxmox VE API. Set up the account
-first — see [SSH access and security](/cv4pve-node-protect/ssh-access/).
+first: see [SSH access and security](/cv4pve-node-protect/ssh-access/).
 
 ## What happens on each node
 
@@ -21,15 +21,15 @@ For every host in `--host`, one after the other, the tool:
 
 3. writes what `tar` sends on the SSH channel straight into the local archive, and closes the connection.
 
-Nothing is installed and no file is written on the node — not even in `/tmp`. The command only reads.
+Nothing is installed and no file is written on the node, not even in `/tmp`. The command only reads.
 With [`--debug`](/cv4pve-node-protect/troubleshooting/) the tool prints the exact command it runs.
 
 ## Options
 
 | Option | What it does |
 |---|---|
-| `--host` | The nodes to back up, comma-separated, each `host[:port]`; the port defaults to 22. Every node in the list is backed up — it is not a list of alternatives as in the API-based cv4pve tools. |
-| `--username` | SSH user. Always needed, with a key too. Use `root` — see [Which account](/cv4pve-node-protect/ssh-access/#which-account). |
+| `--host` | The nodes to back up, comma-separated, each `host[:port]`; the port defaults to 22. Every node in the list is backed up: it is not a list of alternatives as in the API-based cv4pve tools. |
+| `--username` | SSH user. Always needed, with a key too. Use `root`, see [Which account](/cv4pve-node-protect/ssh-access/#which-account). |
 | `--private-key-file` | SSH private key; the file must exist. When given, only the key is tried, not the password. |
 | `--passphrase` | Passphrase of the key, if it has one. |
 | `--password` | SSH password, or `file:/path` to read it from a file (whole file, leading and trailing spaces and new lines removed). |
@@ -53,7 +53,7 @@ it**: `--host=192.168.1.10` gives `192.168.1.10-config.tar.gz`, so use node name
 named after the nodes. On Windows, which does not allow `:` in file names, the `:` of an IPv6 address
 becomes `_`: `--host=fe80::1` gives `fe80__1-config.tar.gz`.
 
-If one node fails, the others are still backed up and the run ends with exit code 1 — see
+If one node fails, the others are still backed up and the run ends with exit code 1: see
 [When a run fails](/cv4pve-node-protect/archive/#when-a-run-fails).
 
 ## Options in a file

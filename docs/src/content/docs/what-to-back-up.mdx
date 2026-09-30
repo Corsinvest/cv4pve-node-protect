@@ -16,7 +16,7 @@ by `;`. Quote the list, because `;` separates commands in every shell.
 |---|---|---|
 | `/etc/.` | The node's own configuration: `network/interfaces`, `hosts`, `hostname`, `resolv.conf`, `fstab`, `kernel/cmdline`, `modprobe.d/`, apt sources, `vzdump.conf`, `corosync/`, ZFS and LVM configuration, SSH host keys | Everything you would otherwise rebuild by hand after reinstalling the node |
 | `/etc/pve/.` | The cluster configuration as readable files: `storage.cfg`, `datacenter.cfg`, `user.cfg`, `jobs.cfg`, firewall rules, guest configurations, certificates, `priv/` | To take back a single file: a storage definition, a VM configuration |
-| `/var/lib/pve-cluster/.` | `config.db`: the database the files of `/etc/pve` are stored in | The unit the Proxmox VE documentation restores when a node is lost — see [Restore](../restore/) |
+| `/var/lib/pve-cluster/.` | `config.db`: the database the files of `/etc/pve` are stored in | The unit the Proxmox VE documentation restores when a node is lost: see [Restore](../restore/) |
 | `/var/spool/cron/crontabs` | Cron jobs created with `crontab -e` | They are not under `/etc` |
 | `/root/.ssh` | root's keys and `authorized_keys` | Access to and from the other nodes and your scripts |
 
@@ -33,10 +33,10 @@ mounted inside a path. So `/etc/.` gives you everything in `/etc` **except** `/e
 
 The content of `/etc/pve` is saved in two ways, and you want both:
 
-- **`/var/lib/pve-cluster/.`** — pmxcfs keeps all of `/etc/pve` in the SQLite database
+- **`/var/lib/pve-cluster/.`**: pmxcfs keeps all of `/etc/pve` in the SQLite database
   `config.db`. This is the file the [Proxmox VE documentation](https://pve.proxmox.com/pve-docs/chapter-pmxcfs.html#_recovery)
   moves to a new host to recover a node.
-- **`/etc/pve/.`** listed explicitly — `tar` archives a path given on the command line even when it is a
+- **`/etc/pve/.`** listed explicitly: `tar` archives a path given on the command line even when it is a
   separate file system, so you get the same content as plain files you can open and copy back one by
   one.
 
@@ -58,7 +58,7 @@ second source if one day it does not.
 
 - Use absolute paths. The archive stores them as written: with `/etc/.` the entries are named
   `/etc/./network/interfaces`, with `/etc` they are `/etc/network/interfaces`. You need the exact name
-  to extract a single file — list the archive first.
+  to extract a single file, so list the archive first.
 - A path that does not exist on the node is left out with a warning and the run goes on, so the same
   list works on nodes with and without, say, `/root/scripts`. A typo gives the same warning, not an
   error: read the warnings.

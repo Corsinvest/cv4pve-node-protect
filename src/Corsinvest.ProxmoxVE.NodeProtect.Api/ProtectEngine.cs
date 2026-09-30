@@ -12,7 +12,7 @@ namespace Corsinvest.ProxmoxVE.NodeProtect.Api;
 /// <summary>
 /// Backs up configuration from a single Proxmox VE node via SSH.
 /// The tar.gz archive is streamed over the SSH channel directly into the caller's
-/// target file — no temporary files are created on the node.
+/// target file: no temporary files are created on the node.
 /// </summary>
 public class ProtectEngine(ILogger<ProtectEngine> logger)
 {
@@ -78,7 +78,7 @@ public class ProtectEngine(ILogger<ProtectEngine> logger)
 
     /// <summary>
     /// Streams a tar.gz of the given paths from the node into <paramref name="destination"/>.
-    /// Nothing is written to the node's filesystem nor to the local disk — the caller owns the stream.
+    /// Nothing is written to the node's filesystem nor to the local disk: the caller owns the stream.
     /// </summary>
     /// <param name="node">Host name shown in logs (informational).</param>
     /// <param name="connectionInfo">SSH connection info with auth already configured by the caller.</param>

@@ -18,8 +18,8 @@ dotnet add package Corsinvest.ProxmoxVE.NodeProtect.Api
 runs the same `tar` command as the tool ([What happens on each node](../connection/#what-happens-on-each-node))
 and writes the archive to a file or a stream.
 
-`ProtectHelper` gives the rest of the tool's layout — host parsing, archive names, which dated folders
-retention deletes — so your application can store backups the way the tool does. The loop over the
+`ProtectHelper` gives the rest of the tool's layout (host parsing, archive names, which dated folders
+retention deletes), so your application can store backups the way the tool does. The loop over the
 nodes, the credentials and what to do when one node fails stay yours.
 
 ## Example
@@ -64,7 +64,7 @@ await engine.BackupNodeToStreamAsync("pve01", connection, paths, stream);
 
 ### ProtectEngine
 
-`ProtectEngine(ILogger<ProtectEngine> logger)` — logs at `Debug` level the command run on the node and
+`ProtectEngine(ILogger<ProtectEngine> logger)` logs at `Debug` level the command run on the node and
 the time taken, and at `Warning` level every line `tar` writes to its error output: paths it left out,
 files that changed while read.
 
@@ -86,7 +86,7 @@ Exceptions:
 - The SSH.NET exceptions for connection and authentication errors.
 
 The same cautions as the tool apply: paths that do not exist or cannot be read are left out with a
-warning on the logger, not an exception, and the host key is not checked — the `SshClient` is created
+warning on the logger, not an exception, and the host key is not checked: the `SshClient` is created
 inside the engine, so the caller cannot add a check. See [SSH access and security](../ssh-access/).
 
 ### ProtectHelper
