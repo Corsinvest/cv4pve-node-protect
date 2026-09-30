@@ -28,10 +28,11 @@ public class ProtectEngine(ILogger<ProtectEngine> logger)
 
     /// <summary>
     /// The command run on the node. <c>-f -</c> streams the archive to stdout, so it goes over SSH
-    /// without touching the node's disk; <c>--ignore-failed-read</c> tolerates paths that do not exist.
+    /// without touching the node's disk; <c>--ignore-failed-read</c> tolerates paths that do not exist;
+    /// <c>--</c> ends the options, so a path starting with <c>-</c> is never read as one.
     /// </summary>
     internal static string BuildTarCommand(IEnumerable<string> paths)
-        => $"tar --one-file-system --ignore-failed-read -czPf - {string.Join(" ", paths.Select(ShellQuote))}";
+        => $"tar --one-file-system --ignore-failed-read -czPf - -- {string.Join(" ", paths.Select(ShellQuote))}";
 
     internal static string ShellQuote(string value)
     {

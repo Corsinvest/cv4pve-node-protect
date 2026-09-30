@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--debug` and `--log-level` now show the backup engine's log: the `tar` command run on each node and how long the transfer took. Before, they only added the stack trace to errors
 - A failed run no longer leaves an empty dated folder, which counted as a backup for `--keep`
 - IPv6 hosts on Windows: the `:` of the address is replaced by `_` in the archive name, since Windows does not allow it in file names. Before, the run failed
+- A path in `--paths` starting with `-` is now always a path: `tar` gets `--` before the paths. Before, it was read as a `tar` option, so a value like `--checkpoint-action=exec=…` could run a command on the node
 
 ## [2.1.1] - 2026-04-20
 
