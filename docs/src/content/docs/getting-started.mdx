@@ -5,8 +5,8 @@ description: Install cv4pve-node-protect, connect it to your Proxmox VE nodes ov
 
 import CliInstall from '@corsinvest/cv4pve-docs-theme/components/CliInstall.astro';
 
-cv4pve-node-protect runs **outside the cluster** — on your workstation, a management VM or the machine
-that keeps your backups — and connects to each node over **SSH** on port 22. It does not use the
+cv4pve-node-protect runs **outside the cluster** (on your workstation, a management VM or the machine
+that keeps your backups) and connects to each node over **SSH** on port 22. It does not use the
 Proxmox VE API and nothing is installed on the nodes.
 
 ## Installation
@@ -15,8 +15,8 @@ Proxmox VE API and nothing is installed on the nodes.
 
 ## First run
 
-You need SSH access as `root` to every node — see [SSH access and security](/cv4pve-node-protect/ssh-access/)
-— and a local folder for the archives, readable only by you: the tool does not create it.
+You need SSH access as `root` to every node (see [SSH access and security](/cv4pve-node-protect/ssh-access/))
+and a local folder for the archives, readable only by you: the tool does not create it.
 
 ```bash
 mkdir -p /srv/node-protect && chmod 700 /srv/node-protect
@@ -34,9 +34,9 @@ cv4pve-node-protect has one command, `backup`. Its options:
 
 | Option | What it does |
 |---|---|
-| `--paths` | Paths on the node to archive, separated by `;`. Required, no default — see [What to back up](/cv4pve-node-protect/what-to-back-up/). |
+| `--paths` | Paths on the node to archive, separated by `;`. Required, no default: see [What to back up](/cv4pve-node-protect/what-to-back-up/). |
 | `--directory-work` | Local folder for the archives. Required; it must exist. |
-| `--keep` | Number of dated folders to keep, 1 to 100. Required — see [Retention](/cv4pve-node-protect/archive/#retention). |
+| `--keep` | Number of dated folders to keep, 1 to 100. Required: see [Retention](/cv4pve-node-protect/archive/#retention). |
 
 The connection options go **before** `backup`, these after it. The output:
 

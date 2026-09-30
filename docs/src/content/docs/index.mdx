@@ -1,10 +1,10 @@
 ---
 title: cv4pve-node-protect
-description: Configuration backup for Proxmox VE nodes over SSH — network, storage, cluster database and certificates in one tar.gz per node, with retention.
+description: Configuration backup for Proxmox VE nodes over SSH, with network, storage, cluster database and certificates in one tar.gz per node and automatic retention.
 template: splash
 hero:
   title: Back up the configuration of your <span class="accent-mark">Proxmox VE</span> nodes
-  tagline: Runs outside the nodes, over SSH — one tar.gz per node with the files you choose, from /etc/network/interfaces to the cluster database, in dated folders with automatic retention.
+  tagline: Runs outside the nodes, over SSH. One tar.gz per node with the files you choose, from /etc/network/interfaces to the cluster database, in dated folders with automatic retention.
   actions:
     - text: Get started
       link: /cv4pve-node-protect/getting-started/
@@ -58,14 +58,14 @@ runs the same engine as its [Node Protect](https://corsinvest.github.io/cv4pve-a
 
 ## Outside the nodes, over SSH
 
-cv4pve-node-protect runs outside the cluster — on your workstation, a management VM or the machine
-that keeps your backups — and connects to each node over **SSH**, not through the Proxmox VE API.
+cv4pve-node-protect runs outside the cluster (on your workstation, a management VM or the machine
+that keeps your backups) and connects to each node over **SSH**, not through the Proxmox VE API.
 On every node it runs a single `tar` command and streams the archive back; nothing is installed and
 nothing is written on the node.
 
 Reading the whole configuration needs `root`, and the archives hold secrets such as `/etc/shadow`,
 SSH keys and storage passwords. [SSH access and security](/cv4pve-node-protect/ssh-access/)
-explains the account, the host key and how to keep the archives safe — read it before the first run.
+explains the account, the host key and how to keep the archives safe: read it before the first run.
 
 ## What an archive contains
 

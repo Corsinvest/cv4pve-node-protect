@@ -17,7 +17,7 @@ Node Protect for Proxmox VE (Made in Italy)
 [![WinGet](https://img.shields.io/winget/v/Corsinvest.cv4pve.nodeprotect?style=flat-square&logo=windows)](https://winstall.app/apps/Corsinvest.cv4pve.nodeprotect)
 [![AUR](https://img.shields.io/aur/version/cv4pve-node-protect?style=flat-square&logo=archlinux)](https://aur.archlinux.org/packages/cv4pve-node-protect)
 
-> **Configuration backup for Proxmox VE nodes** — connects to each node over SSH and saves the files you choose, from `/etc/network/interfaces` to the cluster database, in one `tar.gz` per node with automatic retention.
+> **Configuration backup for Proxmox VE nodes**: connects to each node over SSH and saves the files you choose, from `/etc/network/interfaces` to the cluster database, in one `tar.gz` per node with automatic retention.
 >
 > **[Documentation](https://corsinvest.github.io/cv4pve-node-protect/)**
 >
@@ -29,19 +29,19 @@ Node Protect for Proxmox VE (Made in Italy)
 
 Proxmox VE backup jobs save your VMs and containers, not the node they run on. Bridges, bonds and VLANs, `/etc/hosts`, storage definitions, the cluster configuration in `/etc/pve`, certificates, SSH keys, cron jobs and scripts live on the node. When its boot disk dies, rebuilding them by hand is slow and easy to get wrong.
 
-cv4pve-node-protect copies those files from every node into a dated archive, on a schedule, so you can see what changed and put back exactly what was there. It **runs outside the nodes and connects over SSH** — not through the Proxmox VE API: nothing is installed or written on the nodes. It needs `root`, and the archives contain secrets: read [SSH access and security](https://corsinvest.github.io/cv4pve-node-protect/ssh-access/) first.
+cv4pve-node-protect copies those files from every node into a dated archive, on a schedule, so you can see what changed and put back exactly what was there. It **runs outside the nodes and connects over SSH**, not through the Proxmox VE API. Nothing is installed or written on the nodes. It needs `root`, and the archives contain secrets: read [SSH access and security](https://corsinvest.github.io/cv4pve-node-protect/ssh-access/) first.
 
 ---
 
 ## Features
 
-- **The whole cluster in one run** — every node in `--host`, one archive per node in the same dated folder.
-- **You choose what goes in** — `/etc`, the readable `/etc/pve` files, the cluster database, crontabs, SSH keys, your scripts.
-- **Nothing left on the nodes** — `tar` streams over SSH straight into your local file: no temporary files, no agent.
-- **Retention** — `--keep` removes the oldest dated folders, never other folders.
-- **Plain `tar.gz`** — restore with standard tools, [step by step](https://corsinvest.github.io/cv4pve-node-protect/restore/).
+- **The whole cluster in one run**: every node in `--host`, one archive per node in the same dated folder.
+- **You choose what goes in**: `/etc`, the readable `/etc/pve` files, the cluster database, crontabs, SSH keys, your scripts.
+- **Nothing left on the nodes**: `tar` streams over SSH straight into your local file, with no temporary files and no agent.
+- **Retention**: `--keep` removes the oldest dated folders, never other folders.
+- **Plain `tar.gz`**: restore with standard tools, [step by step](https://corsinvest.github.io/cv4pve-node-protect/restore/).
 - **Password or SSH key**, custom port per host, IPv4, IPv6 and host names.
-- **.NET library** — the engine is on NuGet as `Corsinvest.ProxmoxVE.NodeProtect.Api`.
+- **.NET library**: the engine is on NuGet as `Corsinvest.ProxmoxVE.NodeProtect.Api`.
 
 ---
 

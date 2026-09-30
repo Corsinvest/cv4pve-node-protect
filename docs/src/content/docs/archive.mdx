@@ -30,7 +30,7 @@ machine running the tool, with one archive per node:
 
 A gzip-compressed tar archive, made by GNU `tar` on the node, with owners, groups and permissions of
 every file. The entries keep their absolute path (`/etc/./hostname`); the extraction tools remove the
-leading `/`, so extracting into a folder is safe — see [Restore](../restore/).
+leading `/`, so extracting into a folder is safe (see [Restore](../restore/)).
 
 Any tar tool reads them: `tar` on Linux and macOS, the `tar.exe` included in Windows 10 and later.
 
@@ -48,12 +48,12 @@ Only folders whose name is a date in the format above are counted and deleted. A
 `--directory-work` is left alone, so you can keep notes or other files there.
 
 To keep daily, weekly and monthly copies, use one `--directory-work` per schedule, each with its own
-`--keep` — see [Scheduling](../scheduling/).
+`--keep` (see [Scheduling](../scheduling/)).
 
 ## When a run fails
 
-The nodes are backed up one after the other. An error on one node — it does not answer, the login is
-refused, `tar` fails — does not stop the others:
+The nodes are backed up one after the other. An error on one node (it does not answer, the login is
+refused, `tar` fails) does not stop the others:
 
 - the error is printed as `ERROR [node]: …` and the run goes on with the next node;
 - the half-written archive of the failing node is deleted;
@@ -65,5 +65,5 @@ refused, `tar` fails — does not stop the others:
 While a node is down, every run fails for that node and retention never runs, so dated folders pile up
 in `--directory-work`. Take the node out of `--host` for as long as it is down.
 
-A `tar` that ends with exit code 1 — some file changed while it was read, common on a running system —
-is **not** an error: the archive is kept and `tar`'s message is printed as a warning.
+A `tar` that ends with exit code 1, because some file changed while it was read (common on a running
+system), is **not** an error: the archive is kept and `tar`'s message is printed as a warning.

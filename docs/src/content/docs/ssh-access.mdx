@@ -39,7 +39,7 @@ does not read `known_hosts`. It cannot tell your node from a machine that answer
 
 On a network where someone can redirect the traffic:
 
-- with a **password**, the password is sent to whoever answers — root's password of your node;
+- with a **password**, the password is sent to whoever answers: root's password of your node;
 - with a **key**, the private key never leaves your machine, but the archive you receive may not come
   from your node.
 
@@ -50,7 +50,7 @@ authentication.
 
 A backup of `/etc/.`, `/etc/pve/.` and `/var/lib/pve-cluster/.` contains, among others:
 
-- `/etc/shadow` — password hashes of the node's local users;
+- `/etc/shadow`: password hashes of the node's local users;
 - the node's SSH host keys, and root's keys if you save `/root/.ssh`;
 - `/etc/pve/priv/` and the same data inside `config.db`: API token secrets, TFA configuration, storage
   passwords, the private key of the cluster's certificate authority;
@@ -63,7 +63,7 @@ as you treat root access:
   `600`: only the account that runs the backups can read them. On Windows they take the permissions of
   `--directory-work`, so restrict that folder to the account that runs the backups;
 - if you copy the archives elsewhere, encrypt them;
-- delete them when they are no longer needed — `--keep` does this for the folders it manages.
+- delete them when they are no longer needed; `--keep` does this for the folders it manages.
 
 ## Other outbound connections
 
