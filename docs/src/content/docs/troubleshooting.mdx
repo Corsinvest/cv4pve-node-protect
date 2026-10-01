@@ -53,3 +53,26 @@ tar -tzf pve01-config.tar.gz | grep -E 'config.db|network/interfaces'
 The usual causes: a typo in `--paths`, a user other than `root` ([Which account](../ssh-access/#which-account)),
 or a path on another file system, such as `/etc/pve` inside `/etc/.`
 ([why](../what-to-back-up/#why-etc-misses-etcpve)).
+
+## Git Bash on Windows
+
+Git Bash rewrites an argument that starts with `/` into a Windows path, so `--paths='/etc/.'` reaches the
+tool as `C:/Program Files/Git/etc/.`. No such path exists on the node: `tar` prints the warning above,
+the archives are empty and the run still ends with exit code 0.
+
+```text
+Directory Node to archive:
+C:/Program Files/Git/etc/hostname
+warn: Corsinvest.ProxmoxVE.NodeProtect.Api.ProtectEngine[0]
+      [pve01] tar: C\:/Program Files/Git/etc/hostname: Warning: Cannot stat: No such file or directory
+```
+
+Turn the conversion off for the command:
+
+```bash
+MSYS_NO_PATHCONV=1 cv4pve-node-protect --host=pve01 --username=root --private-key-file=key backup \
+    --keep=7 --paths='/etc/.;/etc/pve/.' --directory-work=C:/backup/node-protect
+```
+
+PowerShell and `cmd` do not rewrite the paths. Paths in an
+[options file](../connection/#options-in-a-file) are not rewritten either.
