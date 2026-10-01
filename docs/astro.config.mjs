@@ -37,7 +37,7 @@ export default defineConfig({
       ],
       lastUpdated: true,
       sidebar: [
-        { label: 'Start here', items: ['getting-started', 'ssh-access', 'connection', 'troubleshooting'] },
+        { label: 'Start here', items: ['getting-started', 'ssh-access', 'connection', 'ai-agents', 'troubleshooting'] },
         { label: 'Backup', items: ['what-to-back-up', 'archive', 'scheduling'] },
         { label: 'Restore', items: ['restore'] },
         { label: 'Reference', items: [{ label: '.NET library', slug: 'library' }] },
