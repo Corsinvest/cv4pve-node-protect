@@ -77,6 +77,7 @@ mkdir -p /srv/node-protect && chmod 700 /srv/node-protect
 | [Scheduling](https://corsinvest.github.io/cv4pve-node-protect/scheduling/) | cron and Task Scheduler |
 | [Restore](https://corsinvest.github.io/cv4pve-node-protect/restore/) | A single file, a reinstalled node, a lost node |
 | [.NET library](https://corsinvest.github.io/cv4pve-node-protect/library/) | The engine in your own application |
+| [AI assistants](https://corsinvest.github.io/cv4pve-node-protect/ai-agents/) | Claude Code, Codex, the `cv4pve-node-protect` skill |
 | [Troubleshooting](https://corsinvest.github.io/cv4pve-node-protect/troubleshooting/) | Diagnostic options and common errors |
 
 ---

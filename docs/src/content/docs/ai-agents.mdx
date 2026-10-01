@@ -1,0 +1,36 @@
+---
+title: AI assistants
+description: Let an AI assistant such as Claude Code or Codex back up the configuration of Proxmox VE nodes with cv4pve-node-protect and find a file in its archives, with the cv4pve-node-protect skill, and what root access over SSH means for it.
+---
+
+import AiSkill from '@corsinvest/cv4pve-docs-theme/components/AiSkill.astro';
+
+An AI assistant that can run shell commands can use cv4pve-node-protect to back up the configuration of
+the nodes when you ask, and to work with the archives: find a file, extract it into a staging folder,
+compare it with another run, and give you the steps of a [restore](/cv4pve-node-protect/restore/). It
+never writes on a node.
+
+## The cv4pve-node-protect skill
+
+<AiSkill tool="cv4pve-node-protect">
+
+- connect only with the options file, passed with `@`, and use it for `backup` only, never for an SSH
+  session;
+- before a backup, work out which old backups [`--keep`](/cv4pve-node-protect/archive/#retention) will
+  delete, name them and wait for your agreement;
+- treat the archives as secrets: not print what is in them, not copy them elsewhere, and leave the restore
+  to you.
+
+</AiSkill>
+
+## The account is root
+
+The other cv4pve tools use an API token, which you can limit to reading. cv4pve-node-protect
+[connects as root over SSH](/cv4pve-node-protect/ssh-access/#which-account), and there is no read-only
+root: an assistant that can read the options file can do anything on every node, and the skill cannot
+prevent that. If that is more than you want to give it, run the backup yourself or on a
+[schedule](/cv4pve-node-protect/scheduling/) and let the assistant work on the archives, which needs no
+access to the nodes.
+
+The archives hold what is on the nodes, [secrets included](/cv4pve-node-protect/ssh-access/#the-archives-contain-secrets):
+give the assistant access only to the folder it needs.
