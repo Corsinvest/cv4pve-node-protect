@@ -1,0 +1,34 @@
+---
+/*
+ * What `cv4pve-node-protect backup` prints, for the home page and for Getting started: the same output
+ * in both places, written once here. Only the output: on both pages the command is right above it.
+ * The lines are those of Program.cs (the settings of the run, the paths, then "Create config:" for
+ * each node); the colours are the documentation's, to tell the three parts apart: the tool prints
+ * plain text.
+ *
+ * `directory` is the value of --directory-work in the command above: the tool prints it as given, and
+ * the archives relative to it.
+ */
+import TerminalOutput from '@corsinvest/cv4pve-docs-theme/components/TerminalOutput.astro';
+
+interface Props {
+  /** Value of --directory-work in the command above. */
+  directory: string;
+}
+
+const { directory } = Astro.props;
+const nodes = ['pve01', 'pve02', 'pve03'];
+const paths = ['/etc/.', '/etc/pve/.', '/var/lib/pve-cluster/.'];
+---
+
+<TerminalOutput
+  lines={[
+    { text: 'ACTION Backup', tone: 'accent' },
+    { text: 'Keep: 7', tone: 'muted' },
+    { text: `Directory Work: ${directory}`, tone: 'muted' },
+    { text: 'Directory Node to archive:', tone: 'muted' },
+    ...paths.map((path) => ({ text: path, tone: 'code' as const })),
+    ...nodes.map((node) => ({ text: `Create config: 2026-09-29-03-00-01/${node}-config.tar.gz`, tone: 'ok' as const })),
+  ]}
+  note="The settings of the run, the paths archived on each node, then one line for each archive written."
+/>

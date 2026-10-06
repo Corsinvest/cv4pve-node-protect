@@ -5,30 +5,53 @@ sidebar:
   label: Getting started
 ---
 
+import { Steps } from '@astrojs/starlight/components';
 import CliInstall from '@corsinvest/cv4pve-docs-theme/components/CliInstall.astro';
+import BackupOutput from '../../components/BackupOutput.astro';
 
 cv4pve-node-protect runs **outside the cluster** (on your workstation, a management VM or the machine
 that keeps your backups) and connects to each node over **SSH** on port 22. It does not use the
 Proxmox VE API and nothing is installed on the nodes.
 
-## Installation
+## First backup
 
-<CliInstall repo="cv4pve-node-protect" winget="Corsinvest.cv4pve.nodeprotect" />
+<Steps>
 
-## First run
+1. **Install cv4pve-node-protect**
 
-You need SSH access as `root` to every node (see [SSH access and security](/cv4pve-node-protect/ssh-access/))
-and a local folder for the archives, readable only by you: the tool does not create it.
+   <CliInstall repo="cv4pve-node-protect" winget="Corsinvest.cv4pve.nodeprotect" />
 
-```bash
-mkdir -p /srv/node-protect && chmod 700 /srv/node-protect
+2. **Set up SSH access**
 
-cv4pve-node-protect --host=pve01,pve02,pve03 --username=root --private-key-file=/root/.ssh/id_ed25519 \
-  backup --paths='/etc/.;/etc/pve/.;/var/lib/pve-cluster/.' --directory-work=/srv/node-protect --keep=7
-```
+   You need SSH access as `root` to every node: see
+   [SSH access and security](/cv4pve-node-protect/ssh-access/).
 
-Custom ports, IPv6, password authentication and options in a file for scheduled runs: see
-[Connection](/cv4pve-node-protect/connection/).
+3. **Run `cv4pve-node-protect backup`**
+
+   Create a local folder for the archives, readable only by you (the tool does not create it), then
+   run the backup:
+
+   ```bash
+   mkdir -p /srv/node-protect && chmod 700 /srv/node-protect
+
+   cv4pve-node-protect --host=pve01,pve02,pve03 --username=root --private-key-file=/root/.ssh/id_ed25519 \
+     backup --paths='/etc/.;/etc/pve/.;/var/lib/pve-cluster/.' --directory-work=/srv/node-protect --keep=7
+   ```
+
+   Custom ports, IPv6, password authentication and options in a file for scheduled runs: see
+   [Connection](/cv4pve-node-protect/connection/).
+
+4. **Check the archive**
+
+   Each run creates a folder named after the local date and time, with one archive per node. Read the
+   warnings of the first run and look inside the archive once: a path that does not exist on the node
+   is only a warning, see [Run](#run).
+
+   ```bash
+   tar -tzvf /srv/node-protect/2026-09-29-03-00-01/pve01-config.tar.gz | less
+   ```
+
+</Steps>
 
 ## Run
 
@@ -40,20 +63,16 @@ cv4pve-node-protect has one command, `backup`. Its options:
 | `--directory-work` | Local folder for the archives. Required; it must exist. |
 | `--keep` | Number of dated folders to keep, 1 to 100. Required: see [Retention](/cv4pve-node-protect/archive/#retention). |
 
-The connection options go **before** `backup`, these after it. The output:
+The connection options go **before** `backup`, these after it:
 
-```text
-ACTION Backup
-Keep: 7
-Directory Work: /srv/node-protect
-Directory Node to archive:
-/etc/.
-/etc/pve/.
-/var/lib/pve-cluster/.
-Create config: 2026-09-29-03-00-01/pve01-config.tar.gz
-Create config: 2026-09-29-03-00-01/pve02-config.tar.gz
-Create config: 2026-09-29-03-00-01/pve03-config.tar.gz
+```bash
+cv4pve-node-protect --host=pve01,pve02,pve03 --username=root --private-key-file=/root/.ssh/id_ed25519 \
+  backup --paths='/etc/.;/etc/pve/.;/var/lib/pve-cluster/.' --directory-work=/srv/node-protect --keep=7
 ```
+
+The output:
+
+<BackupOutput directory="/srv/node-protect" />
 
 Each run creates a folder named after the local date and time, with one archive per node. From the
 eighth run on, `--keep=7` deletes the oldest folder and prints `Delete Backup: <folder>`. The tool
