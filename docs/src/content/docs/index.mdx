@@ -25,16 +25,31 @@ hero:
 
 import FeatureGrid from '@corsinvest/cv4pve-docs-theme/components/FeatureGrid.astro';
 import CtaBand from '@corsinvest/cv4pve-docs-theme/components/CtaBand.astro';
+import Motto from '@corsinvest/cv4pve-docs-theme/components/Motto.astro';
+import CliInstall from '@corsinvest/cv4pve-docs-theme/components/CliInstall.astro';
+import BackupOutput from '../../components/BackupOutput.astro';
 import proxmoxLogo from '../../assets/proxmox-logo.svg';
 
 export const features = [
-  { title: 'The whole cluster in one run', text: 'Pass every node in --host: one archive per node, all in the same dated folder.', href: 'archive/' },
-  { title: 'You choose what goes in', text: '/etc, the readable /etc/pve files, the cluster database, crontabs, root SSH keys, your own scripts.', href: 'what-to-back-up/' },
-  { title: 'Nothing left on the nodes', text: 'tar writes to the SSH channel and the archive lands straight in your local file: no temporary files, no agent.', href: 'ssh-access/' },
-  { title: 'Retention built in', text: '--keep removes the oldest dated folders after each run, and never touches other folders.', href: 'archive/#retention' },
-  { title: 'A restore you control', text: 'Plain tar.gz files: extract to a staging folder, compare, then put back only what you need.', href: 'restore/' },
-  { title: 'Scheduled and scriptable', text: 'cron or Task Scheduler, an options file for the connection, exit code 1 when a run fails.', href: 'scheduling/' },
+  { icon: 'mdi:server-network', title: 'The whole cluster in one run', text: 'Pass every node in --host: one archive per node, all in the same dated folder.', href: 'archive/' },
+  { icon: 'mdi:file-tree-outline', title: 'You choose what goes in', text: '/etc, the readable /etc/pve files, the cluster database, crontabs, root SSH keys, your own scripts.', href: 'what-to-back-up/' },
+  { icon: 'mdi:broom', title: 'Nothing left on the nodes', text: 'tar writes to the SSH channel and the archive lands straight in your local file: no temporary files, no agent.', href: 'ssh-access/' },
+  { icon: 'mdi:history', title: 'Retention built in', text: '--keep removes the oldest dated folders after each run, and never touches other folders.', href: 'archive/#retention' },
+  { icon: 'mdi:backup-restore', title: 'A restore you control', text: 'Plain tar.gz files: extract to a staging folder, compare, then put back only what you need.', href: 'restore/' },
+  { icon: 'mdi:calendar-clock-outline', title: 'Scheduled and scriptable', text: 'cron or Task Scheduler, an options file for the connection, exit code 1 when a run fails.', href: 'scheduling/' },
 ];
+
+<Motto />
+
+<CliInstall
+  repo="cv4pve-node-protect"
+  winget="Corsinvest.cv4pve.nodeprotect"
+  run={['--host=pve01,pve02,pve03', '--username=root', '--private-key-file=id_ed25519', "backup --paths='/etc/.;/etc/pve/.;/var/lib/pve-cluster/.'", '--directory-work=.', '--keep=7']}
+/>
+
+One archive per node, in a folder named after the date and time of the run:
+
+<BackupOutput directory="." />
 
 ## Why
 
